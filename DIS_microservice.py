@@ -4,24 +4,14 @@ import pymysql
 import jwt
 import http
 import json
-import requests
+import os
 
 app = Flask(__name__)
 
-app.config['TRADIER_BEARER'] = 'uhzCQ8Lzm5Tx35faBndmsYmQgE4d'
-app.config['SECRET'] = 'XCAP05H6LoKvbRRa/QkqLNMI7cOHguaRyHzyg7n5qEkGjQmtBhz4SzYh4Fqwjyi3KJHlSXKPwVu2+bXr6CtpgQ=='
-app.config['DB_HOST'] = ''
-app.config['DB_USER'] = ''
-app.config['DB_PASS'] = ''
-app.config['DB_NAME'] = ''
-
-app.config['DB_ENGINE'] = db.create_engine('mysql+pymysql://' + app.config['DB_USER'] + ':' + app.config['DB_PASS'] + '@' + app.config['DB_HOST'] + '/' + app.config['DB_NAME'], pool_pre_ping=True)
-
 def authenticate(auth):
     try:
-        decoded = jwt.decode(auth, app.config['SECRET'], algorithm='HS256')
+        decoded = jwt.decode(auth, os.getenv('SECRET'), algorithm='HS256')
         output = {}
-        output['uid'] = decoded['uid']
         output['username'] = decoded['username']
         output['email'] = decoded['email']
         
@@ -35,19 +25,20 @@ def save_to_db(b_type, name, acc, price, amt, inventory):
     if name != '' and acc != '' and float(price) > 0 and int(amt) > 0:
         if(b_type == 'BUY'):
             if inventory - int(amt) > 0:
-                sql = 'INSERT INTO buy_sell(b_type, username, t_account, price, quantity) VALUES(\'SELL\', \'admin\', \'admin@obs.com\', \'' + str(price) + '\', \'' + str(amt) + '\'),'
+                sql = 'INSERT INTO buy_sell(b_type, username, t_account, price, quantity) VALUES(\'SELL\', \'admin\', \'Bank Stock Inventory\', \'' + str(price) + '\', \'' + str(amt) + '\'),'
                 sql += '(\'' + b_type + '\', \'' + name + '\', \'' + acc + '\', \'' + str(price) + '\', \'' + str(amt) + '\');'
                 buy = query_db(sql)
                 return 'Bought from stock inventory'
             else:
                 required = int(amt) - inventory + 100
-                sql = 'INSERT INTO buy_sell(b_type, username, t_account, price, quantity) VALUES(\'BUY\', \'admin\', \'admin@obs.com\', \'' + str(price) + '\', \'' + str(required) + '\'),'
-                sql += '(\'SELL\', \'admin\', \'admin@obs.com\', \'' + str(price) + '\', \'' + str(amt) + '\'),'
+                sql = 'INSERT INTO buy_sell(b_type, username, t_account, price, quantity) VALUES(\'BUY\', \'admin\', \'Bank Stock Inventory\', \'' + str(price) + '\', \'' + str(required) + '\'),'
+                sql += '(\'SELL\', \'admin\', \'Bank Stock Inventory\', \'' + str(price) + '\', \'' + str(amt) + '\'),'
                 sql += '(\'' + b_type + '\', \'' + name + '\', \'' + acc + '\', \'' + str(price) + '\', \'' + str(amt) + '\');'
                 buy = query_db(sql)
                 return 'Stock inventory overdrawn, inventory bought needed amt plus 100 and completed the buy'
         elif(b_type == 'SELL'):
-            sql = 'INSERT INTO buy_sell(b_type, username, t_account, price, quantity) VALUES(\'BUY\', \'admin\', \'admin@obs.com\', \'' + str(price) + '\', \'' + str(amt) + '\'),'
+
+            sql = 'INSERT INTO buy_sell(b_type, username, t_account, price, quantity) VALUES(\'BUY\', \'admin\', \'Bank Stock Inventory\', \'' + str(price) + '\', \'' + str(amt) + '\'),'
             sql += '(\'' + b_type + '\', \'' + name + '\', \'' + acc + '\', \'' + str(price) + '\', \'' + str(amt) + '\');'
             sell = query_db(sql)
             return 'Sold to stock inventory'
@@ -74,9 +65,9 @@ def form_buy_sell_response(b_type, name, acc, price, amt):
     transaction = json.loads('{}')
 
     if b_type == 'BUY':
-        output_str = "{\"TransactionType\" : \"BUY\", \"User\" : \"" + name + "\", \"Account\" : \"Savings Account\", \"Price\" : " + str(price) + ", \"Quantity\" : " + str(amt) + ", \"CostToUser\" : " + str(value)+ "}"
+        output_str = "{\"TransactionType\" : \"BUY\", \"User\" : \"" + name + "\", \"Account\" : \"" + acc + "\", \"Price\" : " + str(price) + ", \"Quantity\" : " + str(amt) + ", \"CostToUser\" : " + str(value)+ "}"
     elif b_type == 'SELL':
-        output_str = "{\"TransactionType\" : \"SELL\", \"User\" : \"" + name + "\", \"Account\" : \"Savings Account\", \"Price\" : " + str(price) + ", \"Quantity\" : " + str(amt) + ", \"CostToUser\" : " + str(value)+ "}"
+        output_str = "{\"TransactionType\" : \"SELL\", \"User\" : \"" + name + "\", \"Account\" : \"" + acc + "\", \"Price\" : " + str(price) + ", \"Quantity\" : " + str(amt) + ", \"CostToUser\" : " + str(value)+ "}"
     
     try:
         transaction = json.loads(output_str)
@@ -88,12 +79,12 @@ def get_delayed_price():
 
     res = quotes() 
     new_res = res[0]
-    delayed = new_res['quotes']['quote']['last']
+    delayed = round(float(new_res['quotes']['quote']['last']), 2)
 
     return delayed
 
 def query_db(sql):
-    res = app.config['DB_ENGINE'].connect().execute(sql)
+    res = db.create_engine(os.getenv('DB_ENGINE_STR')).connect().execute(sql)
     if 'SELECT' in sql:
         res = res.fetchall()
     return res
@@ -104,7 +95,7 @@ def query_db(sql):
 def quotes():
     conn = http.client.HTTPSConnection('sandbox.tradier.com', 443, timeout=15)
 
-    headers = {'Accept' : 'application/json', 'Authorization' : 'Bearer ' + app.config['TRADIER_BEARER']}
+    headers = {'Accept' : 'application/json', 'Authorization' : 'Bearer ' + os.getenv('TRADIER_BEARER')}
     quote = json.loads('{}')
     conn.request('GET', '/v1/markets/quotes?symbols=DIS', None, headers)
     try:
@@ -119,14 +110,15 @@ def quotes():
 def buy():
     auth = request.headers.get('auth')
     quantity = request.headers.get('quantity')
+    account = request.headers.get('account')
 
     user_data = authenticate(auth)
     
     price = get_delayed_price()
 
     if type(user_data) == type({}):
-        saved = save_to_db('BUY', user_data['username'], user_data['email'], price, quantity, get_stock_inventory())
-        buy = form_buy_sell_response('BUY', user_data['username'], user_data['email'], price, quantity)
+        saved = save_to_db('BUY', user_data['username'], account, price, quantity, get_stock_inventory())
+        buy = form_buy_sell_response('BUY', user_data['username'], account, price, quantity)
         return buy, 200
     else:
         return user_data, 401
@@ -135,14 +127,15 @@ def buy():
 def sell():
     auth = request.headers.get('auth')
     quantity = request.headers.get('quantity')
+    account = request.headers.get('account')
 
     user_data = authenticate(auth)
 
     price = get_delayed_price()
 
     if type(user_data) == type({}):
-        saved = save_to_db('SELL', user_data['username'], user_data['email'], price, quantity, get_stock_inventory())
-        sell = form_buy_sell_response('SELL', user_data['username'], user_data['email'], price, quantity)
+        saved = save_to_db('SELL', user_data['username'], account, price, quantity, get_stock_inventory())
+        sell = form_buy_sell_response('SELL', user_data['username'], account, price, quantity)
         return sell, 200
     else:
         return user_data, 401
@@ -173,5 +166,4 @@ def transactions():
 
 if __name__ == "__main__":
 
-
-    app.run(debug=True, port=5001)
+    app.run(debug=True)
