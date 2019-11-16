@@ -16,9 +16,9 @@ jobs:
         - pytest
         - cd ../..
     - stage: lint
-      script: pylint main.py
-      script: cd micro/adam && pylint main.py && cd ../..
-
+      script:
+        - cd micro/adam && pylint main.py && cd ../..
+        - pylint main.py
 
 
 
