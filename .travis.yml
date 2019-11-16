@@ -25,14 +25,14 @@ jobs:
     -
       script: pytest micro/ben
     #-
-      #script: pytest micro/carlos
+      script: pytest micro/carlos
     - stage: lint
       script:
         - pylint micro/adam/main.py
         - pylint micro/michael/main.py
         #- pylint micro/sean/main.py
         - pylint micro/ben/main.py
-        #- pylint micro/carlos/main.py
+        - pylint micro/carlos/main.py
         - pylint main.py
 #    - stage: static analysis
 #      script: sonar-scanner
