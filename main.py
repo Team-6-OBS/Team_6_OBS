@@ -1,32 +1,26 @@
-import time
-import os
-from flask import Flask, render_template, request
+from flask import Flask, render_template, Blueprint, request
 import jwt
 import sqlalchemy as db
 import pymysql
+import time
 
 app = Flask(__name__)
 
-app.config['SECRET'] = os.environ['JWT_SECRET']
-engine = db.create_engine(os.environ['DB_CONN_STRING'], pool_pre_ping=True)
+app.config['SECRET'] = "XCAP05H6LoKvbRRa/QkqLNMI7cOHguaRyHzyg7n5qEkGjQmtBhz4SzYh4Fqwjyi3KJHlSXKPwVu2+bXr6CtpgQ=="
+app.config['DB_HOST'] = "35.224.129.168"
+app.config['DB_USER'] = "root"
+app.config['DB_PASS'] = "password"
+app.config['DB_NAME'] = "main_server"
 
-#use this route to establish the db connection when its ready
-@app.route('/connect')
-def connect():
-    try:
-        app.config['DB_CONN'] = engine.connect()
-        return 'Connection Successful', 200
-    except:
-        return 'Connection Failed', 500
+engine = db.create_engine('mysql+pymysql://' + app.config['DB_USER'] + ':' + app.config['DB_PASS'] + '@' + app.config['DB_HOST'] + '/' + app.config['DB_NAME'], pool_pre_ping=True)
+app.config['DB_CONN'] = engine.connect()
 
 @app.route('/')
 def home():
-    """The home page."""
     return render_template("obs_navigation.html")
 
 @app.route('/signup', methods=["GET", "POST"])
 def signup():
-    """Creates a new user."""
     if request.method == "GET":
         return render_template("signup.html")
     if request.method == "POST":
@@ -35,7 +29,7 @@ def signup():
         email = request.form.get("email", None)
 
         #check whether all the data was passed in properly
-        if username is None or password is None or email is None:
+        if username == None or password == None or email == None:
             return "Failed Request", 404
 
         #check database for existing user
@@ -43,23 +37,24 @@ def signup():
         existing = app.config['DB_CONN'].execute(sql).fetchall()
         if len(existing) == 0:
             #send to database
-            sql = 'INSERT INTO accounts (username, password, email) VALUES'
-            sql += ' (\'' + username + '\',\'' + password + '\',\'' + email + '\');'
-            app.config['DB_CONN'].execute(sql)
+            sql = 'INSERT INTO accounts (username, password, email) VALUES (\'' + username + '\',\'' + password + '\',\'' + email + '\');'
+            num = app.config['DB_CONN'].execute(sql)
 
             #query for additional auto-generated user info
             sql = 'SELECT uid, username, email FROM accounts WHERE email=\'' + email + '\''
             test = app.config['DB_CONN'].execute(sql).fetchall()
 
-            payload = {'uid' : test[0][0], 'username' : test[0][1], 'email' : test[0][2]}
+            epoch_time = int(time.time()) + 3600   #gets the epoch time in UTC this is used as an expiration for JWT and add an hour
+            payload = {'username' : test[0][1], 'email' : test[0][2], 'exp' : epoch_time}
             token = jwt.encode(payload, app.config['SECRET'], algorithm='HS256')
             return token, 200
+        else:
+            return "Email address already in use", 400
 
-        return "Email address already in use", 400
+        return "Success!", 200
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
-    """Logs in."""
     if request.method == "GET":
         return "Success", 404
     if request.method == "POST":
@@ -67,29 +62,26 @@ def login():
         password = request.form.get("password")
 
         #check whether all the data was passed in properly
-        if username is None or password is None:
+        if username == None or password == None:
             return "Failed Request", 404
 
-        sql = 'SELECT * FROM accounts WHERE username=\'' + username + '\''
-        sql += ' AND password=\'' + password + '\''
+        sql = 'SELECT * FROM accounts WHERE username=\'' + username + '\' AND password=\'' + password + '\''
         test = app.config['DB_CONN'].execute(sql).fetchall()
         #Add form input cases
 
         if len(test) != 0:
-            epoch_time = int(time.time()) + 3600
-            payload = {'uid' : test[0][0], 'username' : test[0][1]}
-            payload['email'] = test[0][2]
-            payload['exp'] = epoch_time
+            epoch_time = int(time.time()) + 3600   #gets the epoch time in UTC this is used as an expiration for JWT and add an hour
+            payload = {'username' : test[0][1], 'email' : test[0][2], 'exp': epoch_time}
             token = jwt.encode(payload, app.config['SECRET'], algorithm='HS256')
+            print(token)
             return token, 200
-
-        return "Invalid User Credentials", 400
+        else:
+            return "Invalid User Credentials", 400
 
 @app.route('/welcome')
 def welcome():
-    """Welcome page."""
     return render_template("obs_home.html")
 
-if __name__ == "__main__":
+if __name__ == "__main__" :
 
     app.run(debug=True)
