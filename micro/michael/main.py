@@ -167,10 +167,13 @@ def sell():
     price = get_delayed_price()
 
     if isinstance(user_data, dict):
-        save_to_db('SELL', user_data['username'], account, price,
+        check = save_to_db('SELL', user_data['username'], account, price,
                    quantity, 5000, get_inventory(user_data['username'], account))
-        sell_res = form_buy_sell_response('SELL', user_data['username'], account, price, quantity)
-        return sell_res, 200
+        if check != 'User Inventory does not have enough shares to sell the requested amount':
+            sell_res = form_buy_sell_response('SELL', user_data['username'], account, price, quantity)
+            return sell_res, 200
+
+        return check, 500
 
     return user_data, 401
 
