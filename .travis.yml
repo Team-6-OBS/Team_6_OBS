@@ -2,23 +2,21 @@ language: python
 python:
   - "3.7"
 
-env:
-  - SECRET=XCAP05H6LoKvbRRa/QkqLNMI7cOHguaRyHzyg7n5qEkGjQmtBhz4SzYh4Fqwjyi3KJHlSXKPwVu2+bXr6CtpgQ==
-  - TRADIER_BEARER=uhzCQ8Lzm5Tx35faBndmsYmQgE4d
-
-matrix:
+jobs:
   include:
-    - language: python
-      python: 3.7
-      script:
-        - pip install -r requirements.txt
-        - pylint main.py
-        - cd micro/adam && pytest && cd ../..
-    - language: node_js
-      node_js: node
+    - stage: build
+      script: pip install -r requirements.txt
+    - #install node dependencies and try to use webpack to build javascript
       script:
         - npm install
         - npm run build
+    - stage: test
+      script: #test adam microservice
+        - cd micro/adam
+        - pytest
+        - cd ../..
+    - stage: lint
+      script: pylint main.py
 
 
 
