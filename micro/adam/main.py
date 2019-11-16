@@ -96,7 +96,7 @@ def query_db(sql):
 def quotes():
     conn = http.client.HTTPSConnection('sandbox.tradier.com', 443, timeout=15)
 
-    headers = {'Accept' : 'application/json', 'Authorization' : 'Bearer ' + os.getenv('TRADIER_ADAM')}
+    headers = {'Accept' : 'application/json', 'Authorization' : 'Bearer ' + os.getenv('TRADIER_BEARER')}
     quote = json.loads('{}')
     conn.request('GET', '/v1/markets/quotes?symbols=NTDOY', None, headers)
     try:

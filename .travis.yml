@@ -17,6 +17,7 @@ jobs:
         - cd ../..
     - stage: lint
       script: pylint main.py
+      script: cd micro/adam && pylint main.py && cd ../..
 
 
 
