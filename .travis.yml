@@ -11,13 +11,22 @@ jobs:
         - npm install
         - npm run build
     - stage: test
-      script: #test adam microservice
-        - cd micro/adam
-        - pytest
-        - cd ../..
+      script: pytest micro/adam
+    -
+      script: pytest micro/michael
+    #-
+      #script: pytest micro/sean
+    -
+      script: pytest micro/ben
+    #-
+      #script: pytest micro/carlos
     - stage: lint
       script:
-        - cd micro/adam && pylint main.py && cd ../..
+        - pylint micro/adam/main.py
+        - pylint micro/michael/main.py
+        #- pylint micro/sean/main.py
+        - pylint micro/ben/main.py
+        #- pylint micro/carlos/main.py
         - pylint main.py
 
 
