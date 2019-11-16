@@ -110,7 +110,7 @@ def get_delayed_price():
 
 def query_db(sql):
     """sends a query to the db deciding between a select or insert types"""
-    res = db.create_engine(os.getenv('DB_CONN_STRING_ADAM')).connect().execute(sql)
+    res = db.create_engine(os.getenv('BEN_DB')).connect().execute(sql)
     if 'SELECT' in sql:
         res = res.fetchall()
     return res
@@ -120,7 +120,7 @@ def query_db(sql):
 #and post requests for buy and sell, returning data for the sale made/failed
 @app.route('/api/quotes', methods=["GET"])
 def quotes():
-    """returns a tradier quote for Nintendo stock"""
+    """returns a tradier quote for SEGA stock"""
     conn = http.client.HTTPSConnection('sandbox.tradier.com', 443, timeout=15)
     bearer_str = 'Bearer ' + os.getenv('TRADIER_BEARER')
     headers = {'Accept' : 'application/json', 'Authorization' : bearer_str}
