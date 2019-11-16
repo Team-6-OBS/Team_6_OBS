@@ -16,5 +16,27 @@ npm install
 
 python main.py
 
-Google Cloud Links:
+admin account: Will give access to buy/sell logs
+username: admin
+password: password
+
+Otherwise create an account for yourself
+
+You can see the token in a dropdown menu after a successful login
+
+Tokens last for an hour before expiring
+
+4. To run microservices locally use the following command
+
+python micro/adam/main.py - Nintendo Stock
+python micro/michael/main.py - Disney Stock
+python micro/ben/main.py - Sega Stock
+python micro/carlos/main.py - Activision/Blizzard Stock
+python micro/sean/main.py - xx Stock
+
+5. To interact with microservices use this API
+
+https://app.swaggerhub.com/apis/OBS_Team6/OBS_Team6_API/1.0#/
+
+6. Google Cloud Links:
 https://obsmainservice.appspot.com   -Signup and Login
