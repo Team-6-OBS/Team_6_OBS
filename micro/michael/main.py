@@ -62,15 +62,15 @@ def save_to_db(b_type, name, acc, price, amt, stock_inventory, user_inventory):
 
     return 'Invalid order amount or quoted price'
 
-def get_inventory(share_source):
+def get_inventory(share_source, share_account):
     """this function gets the current OBS stock"""
 
     bought_query = 'SELECT sum(quantity) AS bought FROM buy_sell WHERE '
-    bought_query += '(username = \'' + share_source + '\' AND b_type = \'BUY\')'
+    bought_query += '(username = \'' + share_source + '\' AND t_account = \'' + share_account + '\' AND b_type = \'BUY\')'
     bought = query_db(bought_query)[0][0]
 
     sold_query = 'SELECT sum(quantity) AS sold FROM buy_sell WHERE (username '
-    sold_query += '= \'' + share_source + '\' AND b_type = \'SELL\')'
+    sold_query += '= \'' + share_source + '\' AND t_account = \'' + share_account + '\' AND b_type = \'SELL\')'
     sold = query_db(sold_query)[0][0]
 
     if sold is not None:
@@ -112,6 +112,7 @@ def get_delayed_price():
 def query_db(sql):
     """sends a query to the db deciding between a select or insert types"""
     res = db.create_engine(os.getenv('DB_CONN_STRING_MICHAEL')).connect().execute(sql)
+    
     if 'SELECT' in sql:
         res = res.fetchall()
     return res
@@ -148,7 +149,7 @@ def buy():
 
     if isinstance(user_data, dict):
         save_to_db('BUY', user_data['username'], account,
-                   price, quantity, get_inventory('admin'), get_inventory(user_data['username']))
+                   price, quantity, get_inventory('admin', 'Bank Stock Inventory'), get_inventory(user_data['username'], account))
         buy_res = form_buy_sell_response('BUY', user_data['username'], account, price, quantity)
         return buy_res, 200
 
@@ -167,7 +168,7 @@ def sell():
 
     if isinstance(user_data, dict):
         save_to_db('SELL', user_data['username'], account, price,
-                   quantity, get_inventory(user_data['username']), get_inventory(user_data['username']))
+                   quantity, 5000, get_inventory(user_data['username'], account))
         sell_res = form_buy_sell_response('SELL', user_data['username'], account, price, quantity)
         return sell_res, 200
 
