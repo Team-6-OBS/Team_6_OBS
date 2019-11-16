@@ -1,15 +1,26 @@
-matrix:
-  include:
-    - language: python
-      python: 3.7
-      script:
-        - pip install -r requirements.txt
-        - pylint main.py
+env:
+  - SECRET=XCAP05H6LoKvbRRa/QkqLNMI7cOHguaRyHzyg7n5qEkGjQmtBhz4SzYh4Fqwjyi3KJHlSXKPwVu2+bXr6CtpgQ==
+  - TRADIER_BEARER=uhzCQ8Lzm5Tx35faBndmsYmQgE4d
 
-    - language: node_js
-      node_js: node
-      script:
-        - npm install
+jobs:
+  include:
+    - stage: build
+      matrix:
+        include:
+          - language: python
+            python: 3.7
+            script:
+              - pip install -r requirements.txt
+              - pylint main.py
+          - language: node_js
+            node_js: node
+            script:
+              - npm install
+    - stage: test
+      script: cd micro/adam && pytest && cd ../..
+
+
+
 
 #before_install:
 #  - nvm install node

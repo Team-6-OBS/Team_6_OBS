@@ -5,21 +5,13 @@ import jwt
 import http
 import json
 import requests
+import os
 
 app = Flask(__name__)
 
-app.config['TRADIER_BEARER'] = 'uhzCQ8Lzm5Tx35faBndmsYmQgE4d'
-app.config['SECRET'] = 'XCAP05H6LoKvbRRa/QkqLNMI7cOHguaRyHzyg7n5qEkGjQmtBhz4SzYh4Fqwjyi3KJHlSXKPwVu2+bXr6CtpgQ=='
-app.config['DB_HOST'] = ''
-app.config['DB_USER'] = ''
-app.config['DB_PASS'] = ''
-app.config['DB_NAME'] = ''
-
-app.config['DB_ENGINE'] = db.create_engine('mysql+pymysql://' + app.config['DB_USER'] + ':' + app.config['DB_PASS'] + '@' + app.config['DB_HOST'] + '/' + app.config['DB_NAME'], pool_pre_ping=True)
-
 def authenticate(auth):
     try:
-        decoded = jwt.decode(auth, os.getenv('SECRET'), algorithm='HS256')
+        decoded = jwt.decode(auth, os.getenv('SECRET'), algorithms='HS256')
         output = {}
         output['username'] = decoded['username']
         output['email'] = decoded['email']
@@ -93,7 +85,7 @@ def get_delayed_price():
     return delayed
 
 def query_db(sql):
-    res = db.create_engine(os.getenv('DB_ENGINE_STR')).connect().execute(sql)
+    res = db.create_engine(os.getenv('DB_CONN_STRING_ADAM')).connect().execute(sql)
     if 'SELECT' in sql:
         res = res.fetchall()
     return res
@@ -104,9 +96,9 @@ def query_db(sql):
 def quotes():
     conn = http.client.HTTPSConnection('sandbox.tradier.com', 443, timeout=15)
 
-    headers = {'Accept' : 'application/json', 'Authorization' : 'Bearer ' + os.getenv('TRADIER_BEARER')}
+    headers = {'Accept' : 'application/json', 'Authorization' : 'Bearer ' + os.getenv('TRADIER_ADAM')}
     quote = json.loads('{}')
-    conn.request('GET', '/v1/markets/quotes?symbols=DIS', None, headers)
+    conn.request('GET', '/v1/markets/quotes?symbols=NTDOY', None, headers)
     try:
         res = conn.getresponse()
         quote = json.loads(res.read().decode('utf-8'))

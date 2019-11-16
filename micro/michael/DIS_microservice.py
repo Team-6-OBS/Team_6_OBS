@@ -8,18 +8,9 @@ import requests
 
 app = Flask(__name__)
 
-app.config['TRADIER_BEARER'] = 'uhzCQ8Lzm5Tx35faBndmsYmQgE4d'
-app.config['SECRET'] = 'XCAP05H6LoKvbRRa/QkqLNMI7cOHguaRyHzyg7n5qEkGjQmtBhz4SzYh4Fqwjyi3KJHlSXKPwVu2+bXr6CtpgQ=='
-app.config['DB_HOST'] = ''
-app.config['DB_USER'] = ''
-app.config['DB_PASS'] = ''
-app.config['DB_NAME'] = ''
-
-app.config['DB_ENGINE'] = db.create_engine('mysql+pymysql://' + app.config['DB_USER'] + ':' + app.config['DB_PASS'] + '@' + app.config['DB_HOST'] + '/' + app.config['DB_NAME'], pool_pre_ping=True)
-
 def authenticate(auth):
     try:
-        decoded = jwt.decode(auth, os.getenv('SECRET'), algorithm='HS256')
+        decoded = jwt.decode(auth, os.getenv('SECRET'), algorithms='HS256')
         output = {}
         output['username'] = decoded['username']
         output['email'] = decoded['email']
