@@ -23,11 +23,11 @@ def authenticate(auth):
         output = 'Access token is missing or invalid'
     return output
 
-def save_to_db(b_type, name, acc, price, amt, inventory):
+def save_to_db(b_type, name, acc, price, amt, stock_inventory, user_inventory):
     """This function takes buy_sell object and saves it to the db"""
     if name != '' and acc != '' and float(price) > 0 and int(amt) > 0:
         if b_type == 'BUY':
-            if inventory - int(amt) > 0:
+            if stock_inventory - int(amt) > 0:
                 sql = 'INSERT INTO buy_sell(b_type, username, t_account, price, quantity) '
                 sql += 'VALUES(\'SELL\', \'admin\', \'Bank Stock Inventory\', \'' + str(price)
                 sql += '\', \'' + str(amt) + '\'),'
@@ -35,8 +35,8 @@ def save_to_db(b_type, name, acc, price, amt, inventory):
                 sql += str(price) + '\', \'' + str(amt) + '\');'
                 query_db(sql)
                 return 'Bought from stock inventory'
-
-            required = int(amt) - inventory + 100
+            
+            required = int(amt) - stock_inventory + 100
             sql = 'INSERT INTO buy_sell(b_type, username, t_account, price, quantity) '
             sql += 'VALUES(\'BUY\', \'admin\', \'Bank Stock Inventory\', \'' + str(price)
             sql += '\', \'' + str(required) + '\'),'
@@ -50,26 +50,27 @@ def save_to_db(b_type, name, acc, price, amt, inventory):
             ret_str += ' needed amt plus 100 and completed the buy'
             return ret_str
 
-        sql = 'INSERT INTO buy_sell(b_type, username, t_account, price, quantity) '
-        sql += 'VALUES(\'BUY\', \'admin\', \'Bank Stock Inventory\', \'' + str(price)
-        sql += '\', \'' + str(amt) + '\'),'
-        sql += '(\'' + b_type + '\', \'' + name + '\', \'' + acc + '\', \'' + str(price)
-        sql += '\', \'' + str(amt) + '\');'
-        query_db(sql)
-        return 'Sold to stock inventory'
+        if user_inventory - int(amt) > 0:
+            sql = 'INSERT INTO buy_sell(b_type, username, t_account, price, quantity) '
+            sql += 'VALUES(\'BUY\', \'admin\', \'Bank Stock Inventory\', \'' + str(price)
+            sql += '\', \'' + str(amt) + '\'),'
+            sql += '(\'' + b_type + '\', \'' + name + '\', \'' + acc + '\', \'' + str(price)
+            sql += '\', \'' + str(amt) + '\');'
+            query_db(sql)
+            return 'Sold to stock inventory'
+        return 'User Inventory does not have enough shares to sell the requested amount'
 
     return 'Invalid order amount or quoted price'
 
-def get_stock_inventory():
+def get_inventory(share_source):
     """this function gets the current OBS stock"""
 
     bought_query = 'SELECT sum(quantity) AS bought FROM buy_sell WHERE '
-    bought_query += '(username = \'admin\' AND b_type = \'BUY\') OR (username != \'admin\' '
-    bought_query += 'AND b_type = \'SELL\')'
+    bought_query += '(username = \'' + share_source + '\' AND b_type = \'BUY\')'
     bought = query_db(bought_query)[0][0]
 
-    sold_query = 'SELECT sum(quantity) AS sold FROM buy_sell WHERE username '
-    sold_query += '!= \'admin\' AND b_type = \'BUY\''
+    sold_query = 'SELECT sum(quantity) AS sold FROM buy_sell WHERE (username '
+    sold_query += '= \'' + share_source + '\' AND b_type = \'SELL\')'
     sold = query_db(sold_query)[0][0]
 
     if sold is not None:
@@ -110,7 +111,7 @@ def get_delayed_price():
 
 def query_db(sql):
     """sends a query to the db deciding between a select or insert types"""
-    res = db.create_engine(os.getenv('DB_CONN_STRING_ADAM')).connect().execute(sql)
+    res = db.create_engine(os.getenv('DB_CONN_STRING_MICHAEL')).connect().execute(sql)
     if 'SELECT' in sql:
         res = res.fetchall()
     return res
@@ -147,7 +148,7 @@ def buy():
 
     if isinstance(user_data, dict):
         save_to_db('BUY', user_data['username'], account,
-                   price, quantity, get_stock_inventory())
+                   price, quantity, get_inventory('admin'), get_inventory(user_data['username']))
         buy_res = form_buy_sell_response('BUY', user_data['username'], account, price, quantity)
         return buy_res, 200
 
@@ -166,7 +167,7 @@ def sell():
 
     if isinstance(user_data, dict):
         save_to_db('SELL', user_data['username'], account, price,
-                   quantity, get_stock_inventory())
+                   quantity, get_inventory(user_data['username']), get_inventory(user_data['username']))
         sell_res = form_buy_sell_response('SELL', user_data['username'], account, price, quantity)
         return sell_res, 200
 
@@ -200,4 +201,4 @@ def transactions():
 
 if __name__ == "__main__":
 
-    app.run(debug=True)
+    app.run()
