@@ -20,6 +20,32 @@ def client(request):
 
     request.addfinalizer(teardown)
 
+#this test will check if the first buy is from the OBS with quantity 5000
+def test_obs_buys5000():
+    price = mainapp.get_delayed_price();
+    sql = 'SELECT * FROM buy_sell where bid = 1 AND username = \'admin\''
+    sql_delete = 'drop table buy_sell'
+    sql_ins = 'INSERT INTO buy_sell (b_type,username,t_account,price,quantity) values(\'BUY\',\'admin\',\'admin@obs.com\',' + str(price) + ',5000)'
+    ret = mainapp.query_db(sql);
+    sql_table = 'create table buy_sell( '
+    sql_table += 'bid int auto_increment primary key, '
+    sql_table +=  'b_type varchar(10), '
+    sql_table +=  'username varchar(50), '
+    sql_table +=  't_account varchar(50), '
+    sql_table +=  'price numeric(10,2), '
+    sql_table +=  'quantity int)'
+
+    #reset the table starting with a buy of 5000
+    mainapp.query_db(sql_delete)
+    mainapp.query_db(sql_table)
+    mainapp.query_db(sql_ins)
+
+    #check that first buy is an OBS buy at 5000
+    ret = mainapp.query_db(sql);
+    assert 'BUY' == str(ret[0][1])
+    assert 'admin' == str(ret[0][2])
+    assert 5000 == int(ret[0][5])
+
 
 def test_authentication():
     pass_test_token = jwt.encode({'username' : 'my_test', 'email' : 'test@py.com'},  config['SECRET'], algorithm='HS256')
