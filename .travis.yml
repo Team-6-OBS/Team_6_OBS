@@ -18,13 +18,13 @@ jobs:
         - npm run build
     - stage: test
       script: pytest micro/adam
-    #-
-      #script: pytest micro/michael
+    -
+      script: pytest micro/michael
     #-
       #script: pytest micro/sean
     -
       script: pytest micro/ben
-    #-
+    -
       script: pytest micro/carlos
     - stage: lint
       script:
