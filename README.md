@@ -3,6 +3,7 @@
 To run:
 
 1. Install Python 3.7.4 --> https://www.python.org/downloads/release/python-374/
+   Install NodeJS https://nodejs.org/dist/v12.13.0/node-v12.13.0-x64.msi
 
 2. After cloning the repository, navigate to its location on your local machine and run the following commands...
 
@@ -16,6 +17,28 @@ npm install
 
 python main.py
 
+admin account: Will give access to transaction logs
+username: admin
+password: password
 
-Google Cloud Links:
-https://obsmainservice.appspot.com   -Signup and Login
+Otherwise create an account for yourself
+
+You can see the token in a dropdown menu after a successful login
+and copy paste by viewing the post request response to /login
+
+Tokens last for an hour before expiring
+
+4. To run microservices locally use the following command
+
+python micro/adam/main.py - Nintendo Stock
+python micro/michael/main.py - Disney Stock
+python micro/ben/main.py - Sega Stock
+python micro/carlos/main.py - Activision/Blizzard Stock
+python micro/sean/main.py - xx Stock
+
+5. To interact with microservices use this API
+
+https://app.swaggerhub.com/apis/OBS_Team6/OBS_Team6_API/1.0#/
+
+6. Google Cloud Links:
+https://obsmicroservice.appspot.com   -Signup and Login

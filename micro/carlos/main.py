@@ -1,4 +1,4 @@
-"""This module controls Nintendo Stock (NTDOY)"""
+"""This module controls Activision Blizzard Stock (ATVI)"""
 
 import os
 import http
@@ -113,7 +113,7 @@ def get_delayed_price():
 
 def query_db(sql):
     """sends a query to the db deciding between a select or insert types"""
-    res = db.create_engine(os.getenv('DB_CONN_STRING_ADAM')).connect().execute(sql)
+    res = db.create_engine(os.getenv('CARLOS_DB')).connect().execute(sql)
 
     if 'SELECT' in sql:
         res = res.fetchall()
@@ -124,12 +124,12 @@ def query_db(sql):
 #and post requests for buy and sell, returning data for the sale made/failed
 @app.route('/api/quotes', methods=["GET"])
 def quotes():
-    """returns a tradier quote for Nintendo stock"""
+    """returns a tradier quote for Activision stock"""
     conn = http.client.HTTPSConnection('sandbox.tradier.com', 443, timeout=15)
     bearer_str = 'Bearer ' + os.getenv('TRADIER_BEARER')
     headers = {'Accept' : 'application/json', 'Authorization' : bearer_str}
     quote = json.loads('{}')
-    conn.request('GET', '/v1/markets/quotes?symbols=NTDOY', None, headers)
+    conn.request('GET', '/v1/markets/quotes?symbols=ATVI', None, headers)
     try:
         res = conn.getresponse()
         quote = json.loads(res.read().decode('utf-8'))

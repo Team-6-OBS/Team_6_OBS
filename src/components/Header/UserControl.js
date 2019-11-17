@@ -45,7 +45,7 @@ export class UserControl extends React.Component {
       .then(
         response => {
           //successful login
-          window.alert("Login successful");
+          window.alert(response.data);
           //this.props.getUser();
         },
         error => {

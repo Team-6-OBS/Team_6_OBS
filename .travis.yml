@@ -2,6 +2,12 @@ language: python
 python:
   - "3.7"
 
+#addons:
+#  sonarcloud:
+#    organization: "team-6-obs"
+#    token:
+#      secure: SONAR_TOKEN
+
 jobs:
   include:
     - stage: build
@@ -14,20 +20,22 @@ jobs:
       script: pytest micro/adam
     -
       script: pytest micro/michael
-    #-
-      #script: pytest micro/sean
+    -
+      script: pytest micro/sean
     -
       script: pytest micro/ben
-    #-
-      #script: pytest micro/carlos
-    - stage: lint
+    -
+      script: pytest micro/carlos
+    - stage: linting
       script:
-        - pylint micro/adam/main.py
-        - pylint micro/michael/main.py
-        #- pylint micro/sean/main.py
-        - pylint micro/ben/main.py
-        #- pylint micro/carlos/main.py
-        - pylint main.py
+        - pylint -E micro/adam/main.py
+        - pylint -E micro/michael/main.py
+        - pylint -E micro/sean/main.py
+        - pylint -E micro/ben/main.py
+        - pylint -E micro/carlos/main.py
+        - pylint -E main.py
+#    - stage: static analysis
+#      script: sonar-scanner
 
 
 
