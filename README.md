@@ -3,6 +3,7 @@
 To run:
 
 1. Install Python 3.7.4 --> https://www.python.org/downloads/release/python-374/
+   Install NodeJS https://nodejs.org/dist/v12.13.0/node-v12.13.0-x64.msi
 
 2. After cloning the repository, navigate to its location on your local machine and run the following commands...
 
@@ -16,7 +17,7 @@ npm install
 
 python main.py
 
-admin account: Will give access to buy/sell logs
+admin account: Will give access to transaction logs
 username: admin
 password: password
 
