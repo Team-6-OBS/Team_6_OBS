@@ -26,6 +26,8 @@ jobs:
       script: pytest micro/ben
     -
       script: pytest micro/carlos
+    -
+      script: pytest main_test.py
     - stage: linting
       script:
         - pylint -E micro/adam/main.py

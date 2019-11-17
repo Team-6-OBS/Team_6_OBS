@@ -1,5 +1,5 @@
 import main as mainapp
-import DIS_microservice
+import sys
 import pytest
 import sqlalchemy as db
 import pymysql
@@ -9,14 +9,9 @@ import builtins
 import jwt, requests
 import json
 import time
+import os
 
-
-DB_HOST = "35.224.129.168"
-DB_USER = "root"
-DB_PASS = "password"
-DB_NAME = "main_server"
-
-engine = db.create_engine('mysql+pymysql://' + DB_USER + ':' + DB_PASS + '@' + DB_HOST + '/' + DB_NAME, pool_pre_ping=True)
+engine = db.create_engine(os.getenv('DB_CONN_STRING'), pool_pre_ping=True)
 conn = engine.connect()
 
 sql_delete = 'delete from accounts where username = \'main_test_user\''
@@ -39,21 +34,36 @@ def test_user_login(client):
 	qres = conn.execute(sql_query).fetchall()
 	qresl = len(qres)
 	assert qresl == 1 #Make sure exactly 1 user was returned
-	
-	latmpt = client.post('/login', data=dict(username ='123', password ='123'))	
+
+	latmpt = client.post('/login', data=dict(username ='123', password ='123'))
 	assert "Invalid User Credentials" == latmpt.data.decode('utf-8') #confirms the denial of invalid users
 
-	resp = client.post('/login', data=dict(username ='main_test_user', password ='main_test_pwd'))	
+	resp = client.post('/login', data=dict(username ='main_test_user', password ='main_test_pwd'))
 	assert "Invalid User Credentials" != resp.data.decode('utf-8') #To make sure a valid user isn't denied
 
 	conn.execute(sql_delete)
-	
+
+#authenticate function used to parse token from auth test
+def authenticate(auth):
+    """This function takes a token and returns the unencrypted results or fails"""
+    try:
+        decoded = jwt.decode(auth, os.getenv('SECRET'), algorithms='HS256')
+        output = {}
+        output['username'] = decoded['username']
+        output['email'] = decoded['email']
+
+    except jwt.ExpiredSignatureError:
+        output = 'Access token is missing or invalid'
+    except jwt.DecodeError:
+        output = 'Access token is missing or invalid'
+    return output
+
 def test_token_authentication(client):
 	atmpt = client.post('/signup', data=dict(username ='main_test_user', password ='main_test_pwd', email = 'main_test@email.com'))
 	resp = client.post('/login', data=dict(username ='main_test_user', password ='main_test_pwd'))
 	token = resp.data.decode('utf-8')
-	autho = DIS_microservice.authenticate(token) #Send the token to the authentication function of a microservice
+	autho = authenticate(token) #Send the token to the authentication function of a microservice
 	assert {'email': 'main_test@email.com', 'username': 'main_test_user'} == autho #See if the response is username and email of associated user's token
-	
+
 	conn.execute(sql_delete)
 	conn.close()
