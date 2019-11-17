@@ -42,3 +42,13 @@ https://app.swaggerhub.com/apis/OBS_Team6/OBS_Team6_API/1.0#/
 
 6. Google Cloud Links:
 https://obsmicroservice.appspot.com   -Signup and Login
+
+ENV VARS:
+SECRET: XCAP05H6LoKvbRRa/QkqLNMI7cOHguaRyHzyg7n5qEkGjQmtBhz4SzYh4Fqwjyi3KJHlSXKPwVu2+bXr6CtpgQ==
+TRADIER_BEARER: uhzCQ8Lzm5Tx35faBndmsYmQgE4d
+DB_CONN_STRING: mysql+pymysql://root:password@35.224.129.168/main_server
+DB_CONN_STRING_ADAM: mysql+pymysql://root:password@35.224.129.168/NTDOY_Logs
+DB_CONN_STRING_MICHAEL: mysql+pymysql://admin:team6adminpass@35.202.171.233/transactions
+BEN_DB: mysql+pymysql://root:password@35.224.129.168/ben
+CARLOS_DB: mysql+pymysql://root:password@35.224.129.168/carlos
+SEAN_DB: mysql+pymysql://root:password@35.224.129.168/sean
