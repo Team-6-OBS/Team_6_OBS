@@ -35,7 +35,7 @@ def save_to_db(b_type, name, acc, price, amt, stock_inventory, user_inventory):
                 sql += str(price) + '\', \'' + str(amt) + '\');'
                 query_db(sql)
                 return 'Bought from stock inventory'
-            
+
             required = int(amt) - stock_inventory + 100
             sql = 'INSERT INTO buy_sell(b_type, username, t_account, price, quantity) '
             sql += 'VALUES(\'BUY\', \'admin\', \'Bank Stock Inventory\', \'' + str(price)
@@ -50,7 +50,7 @@ def save_to_db(b_type, name, acc, price, amt, stock_inventory, user_inventory):
             ret_str += ' needed amt plus 100 and completed the buy'
             return ret_str
 
-        if user_inventory - int(amt) > 0:
+        if user_inventory - int(amt) >= 0:
             sql = 'INSERT INTO buy_sell(b_type, username, t_account, price, quantity) '
             sql += 'VALUES(\'BUY\', \'admin\', \'Bank Stock Inventory\', \'' + str(price)
             sql += '\', \'' + str(amt) + '\'),'
@@ -66,11 +66,13 @@ def get_inventory(share_source, share_account):
     """this function gets the current OBS stock"""
 
     bought_query = 'SELECT sum(quantity) AS bought FROM buy_sell WHERE '
-    bought_query += '(username = \'' + share_source + '\' AND t_account = \'' + share_account + '\' AND b_type = \'BUY\')'
+    bought_query += '(username = \'' + share_source + '\' AND t_account = \'' + share_account
+    bought_query += '\' AND b_type = \'BUY\')'
     bought = query_db(bought_query)[0][0]
 
     sold_query = 'SELECT sum(quantity) AS sold FROM buy_sell WHERE (username '
-    sold_query += '= \'' + share_source + '\' AND t_account = \'' + share_account + '\' AND b_type = \'SELL\')'
+    sold_query += '= \'' + share_source + '\' AND t_account = \'' + share_account
+    sold_query += '\' AND b_type = \'SELL\')'
     sold = query_db(sold_query)[0][0]
 
     if sold is not None:
@@ -112,7 +114,7 @@ def get_delayed_price():
 def query_db(sql):
     """sends a query to the db deciding between a select or insert types"""
     res = db.create_engine(os.getenv('DB_CONN_STRING_MICHAEL')).connect().execute(sql)
-    
+
     if 'SELECT' in sql:
         res = res.fetchall()
     return res
@@ -122,7 +124,7 @@ def query_db(sql):
 #and post requests for buy and sell, returning data for the sale made/failed
 @app.route('/api/quotes', methods=["GET"])
 def quotes():
-    """returns a tradier quote for Nintendo stock"""
+    """returns a tradier quote for Disney stock"""
     conn = http.client.HTTPSConnection('sandbox.tradier.com', 443, timeout=15)
     bearer_str = 'Bearer ' + os.getenv('TRADIER_BEARER')
     headers = {'Accept' : 'application/json', 'Authorization' : bearer_str}
@@ -148,10 +150,14 @@ def buy():
     price = get_delayed_price()
 
     if isinstance(user_data, dict):
-        save_to_db('BUY', user_data['username'], account,
-                   price, quantity, get_inventory('admin', 'Bank Stock Inventory'), get_inventory(user_data['username'], account))
-        buy_res = form_buy_sell_response('BUY', user_data['username'], account, price, quantity)
-        return buy_res, 200
+        check = save_to_db('BUY', user_data['username'], account,
+                           price, quantity, get_inventory('admin', 'Bank Stock Inventory'),
+                           get_inventory(user_data['username'], account))
+        if check != 'Invalid order amount or quoted price':
+           buy_res = form_buy_sell_response('BUY', user_data['username'], account, price, quantity)
+           return buy_res, 200
+
+        return check, 500
 
     return user_data, 401
 
@@ -168,10 +174,12 @@ def sell():
 
     if isinstance(user_data, dict):
         check = save_to_db('SELL', user_data['username'], account, price,
-                   quantity, 5000, get_inventory(user_data['username'], account))
-        if check != 'User Inventory does not have enough shares to sell the requested amount':
-            sell_res = form_buy_sell_response('SELL', user_data['username'], account, price, quantity)
-            return sell_res, 200
+                           quantity, 5000, get_inventory(user_data['username'], account))
+        if (check != 'User Inventory does not have enough shares to sell the requested amount'
+        and check != 'Invalid order amount or quoted price'):
+
+           sell_res = form_buy_sell_response('SELL', user_data['username'], account, price, quantity)
+           return sell_res, 200
 
         return check, 500
 

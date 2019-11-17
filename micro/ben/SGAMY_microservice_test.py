@@ -1,8 +1,6 @@
 import main as mainapp
 import pytest
 from pytest import *
-from _pytest.monkeypatch import MonkeyPatch
-import builtins
 import jwt, requests
 import json
 import os
@@ -25,7 +23,7 @@ def test_obs_buys5000():
     price = mainapp.get_delayed_price();
     sql = 'SELECT * FROM buy_sell where bid = 1 AND username = \'admin\''
     sql_delete = 'drop table buy_sell'
-    sql_ins = 'INSERT INTO buy_sell (b_type,username,t_account,price,quantity) values(\'BUY\',\'admin\',\'admin@obs.com\',' + str(price) + ',5000)'
+    sql_ins = 'INSERT INTO buy_sell (b_type,username,t_account,price,quantity) values(\'BUY\',\'admin\',\'Bank Stock Inventory\',' + str(price) + ',5000)'
     ret = mainapp.query_db(sql);
     sql_table = 'create table buy_sell( '
     sql_table += 'bid int auto_increment primary key, '
@@ -66,14 +64,15 @@ def test_acceptance_save_to_db():
     price = '140.0'
     amt = 20
     inventory = 5000
-    assert mainapp.save_to_db(b_type, name, acc, price, amt, inventory) == 'Bought from stock inventory'
+    user_inv = 100
+    assert mainapp.save_to_db(b_type, name, acc, price, amt, inventory, user_inv) == 'Bought from stock inventory'
 
     amt = 50
     inventory = 40
-    assert mainapp.save_to_db(b_type, name, acc, price, amt, inventory) == 'Stock inventory overdrawn, inventory bought needed amt plus 100 and completed the buy'
+    assert mainapp.save_to_db(b_type, name, acc, price, amt, inventory, user_inv) == 'Stock inventory overdrawn, inventory bought needed amt plus 100 and completed the buy'
 
     amt = 0
-    assert mainapp.save_to_db(b_type, name, acc, price, amt, inventory) == 'Invalid order amount or quoted price'
+    assert mainapp.save_to_db(b_type, name, acc, price, amt, inventory, user_inv) == 'Invalid order amount or quoted price'
 
 def test_get_delayed_price():
 

@@ -23,6 +23,7 @@ password: password
 Otherwise create an account for yourself
 
 You can see the token in a dropdown menu after a successful login
+and copy paste by viewing the post request response to /login
 
 Tokens last for an hour before expiring
 
@@ -39,4 +40,4 @@ python micro/sean/main.py - xx Stock
 https://app.swaggerhub.com/apis/OBS_Team6/OBS_Team6_API/1.0#/
 
 6. Google Cloud Links:
-https://obsmainservice.appspot.com   -Signup and Login
+https://obsmicroservice.appspot.com   -Signup and Login
