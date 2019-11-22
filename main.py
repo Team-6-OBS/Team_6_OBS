@@ -9,7 +9,7 @@ app = Flask(__name__)
 app.config['SECRET'] = "XCAP05H6LoKvbRRa/QkqLNMI7cOHguaRyHzyg7n5qEkGjQmtBhz4SzYh4Fqwjyi3KJHlSXKPwVu2+bXr6CtpgQ=="
 app.config['DB_HOST'] = "35.224.129.168"
 app.config['DB_USER'] = "root"
-app.config['DB_PASS'] = "password"
+app.config['DB_PASS'] = "team6password12345"
 app.config['DB_NAME'] = "main_server"
 
 engine = db.create_engine('mysql+pymysql://' + app.config['DB_USER'] + ':' + app.config['DB_PASS'] + '@' + app.config['DB_HOST'] + '/' + app.config['DB_NAME'], pool_pre_ping=True)

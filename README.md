@@ -3,6 +3,7 @@
 To run:
 
 1. Install Python 3.7.4 --> https://www.python.org/downloads/release/python-374/
+   Install NodeJS https://nodejs.org/dist/v12.13.0/node-v12.13.0-x64.msi
 
 2. After cloning the repository, navigate to its location on your local machine and run the following commands...
 
@@ -16,7 +17,7 @@ npm install
 
 python main.py
 
-admin account: Will give access to buy/sell logs
+admin account: Will give access to transaction logs
 username: admin
 password: password
 
@@ -41,3 +42,13 @@ https://app.swaggerhub.com/apis/OBS_Team6/OBS_Team6_API/1.0#/
 
 6. Google Cloud Links:
 https://obsmicroservice.appspot.com   -Signup and Login
+
+ENV VARS:
+SECRET: XCAP05H6LoKvbRRa/QkqLNMI7cOHguaRyHzyg7n5qEkGjQmtBhz4SzYh4Fqwjyi3KJHlSXKPwVu2+bXr6CtpgQ==
+TRADIER_BEARER: uhzCQ8Lzm5Tx35faBndmsYmQgE4d
+DB_CONN_STRING: mysql+pymysql://root:password@35.224.129.168/main_server
+DB_CONN_STRING_ADAM: mysql+pymysql://root:password@35.224.129.168/NTDOY_Logs
+DB_CONN_STRING_MICHAEL: mysql+pymysql://admin:team6adminpass@35.202.171.233/transactions
+BEN_DB: mysql+pymysql://root:password@35.224.129.168/ben
+CARLOS_DB: mysql+pymysql://root:password@35.224.129.168/carlos
+SEAN_DB: mysql+pymysql://root:password@35.224.129.168/sean

@@ -60,9 +60,9 @@ export class UserControl extends React.Component {
       //show login form
       return (
         <div>
-          <input className="mr-sm-2" type="text" placeholder="Username" name="user" value={this.state.username} onChange={this.onChange.bind(this)}></input>
-          <input className="mr-sm-2" type="password" placeholder="Password" name="pass" value={this.state.password} onChange={this.onChange.bind(this)}></input>
-          <button className="btn btn-outline-success mr-sm-2" onClick={this.login.bind(this)}>Log In</button>
+          <input className="mr-sm-2 username-login" type="text" placeholder="Username" name="user" value={this.state.username} onChange={this.onChange.bind(this)}></input>
+          <input className="mr-sm-2 pass-login" type="password" placeholder="Password" name="pass" value={this.state.password} onChange={this.onChange.bind(this)}></input>
+          <button className="btn btn-outline-success mr-sm-2 button-login" onClick={this.login.bind(this)}>Log In</button>
           <a className="fasdf" href="/signup" style={{textSize: "6px"}}>New User? Sign Up!</a>
         </div>
       );
