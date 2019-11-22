@@ -96,7 +96,7 @@ export class SignupForm extends React.Component {
             <h3>Email: </h3>
           </div>
           <div className="col">
-            <input type="text" name="email" placeholder="Email" value={this.state.email} onChange={this.onChange.bind(this)}></input>
+            <input type="text" name="email" className="email-signup" placeholder="Email" value={this.state.email} onChange={this.onChange.bind(this)}></input>
           </div>
         </div>
         <div className="row">
@@ -104,7 +104,7 @@ export class SignupForm extends React.Component {
             <h3>Username: </h3>
           </div>
           <div className="col">
-            <input type="text" name="user" placeholder="Username" value={this.state.username} onChange={this.onChange.bind(this)}></input>
+            <input type="text" name="user" className="username-signup" placeholder="Username" value={this.state.username} onChange={this.onChange.bind(this)}></input>
           </div>
         </div>
         <div className="row">
@@ -112,7 +112,7 @@ export class SignupForm extends React.Component {
             <h3>Password: </h3>
           </div>
           <div className="col">
-            <input type="password" name="pass" placeholder="Password" value={this.state.password} onChange={this.onChange.bind(this)}></input>
+            <input type="password" name="pass" className="pass-signup" placeholder="Password" value={this.state.password} onChange={this.onChange.bind(this)}></input>
           </div>
         </div>
         <div className="row">
@@ -120,12 +120,12 @@ export class SignupForm extends React.Component {
             <h3>Confirm Password: </h3>
           </div>
           <div className="col">
-            <input type="password" name="passC" placeholder="Confirm Password" value={this.state.passwordC} onChange={this.onChange.bind(this)}></input>
+            <input type="password" name="passC" className="passConfirm-signup" placeholder="Confirm Password" value={this.state.passwordC} onChange={this.onChange.bind(this)}></input>
           </div>
         </div>
         <div className="row">
           <div className="col">
-            <button onClick={this.handlePost.bind(this)}>Create Account</button>
+            <button className="button-signup" onClick={this.handlePost.bind(this)}>Create Account</button>
           </div>
         </div>
       </div>
