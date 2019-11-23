@@ -1,0 +1,1 @@
+Cypress proved to be very useful, as its collection of tools provided many different testing paths that allowed our project to be tested without much refactoring.  The interface clearly presented all the relevant information sent in requests/returns, and included useful features like before and after DOM snapshots of the application during testing runs.
