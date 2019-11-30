@@ -78,6 +78,10 @@ def login():
         else:
             return "Invalid User Credentials", 400
 
+@app.route('/dashboard')
+def dashboard():
+    return render_template("dashboard.html")
+
 @app.route('/welcome')
 def welcome():
     return render_template("obs_home.html")
