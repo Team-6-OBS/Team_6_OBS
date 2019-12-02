@@ -44,9 +44,7 @@ export class UserControl extends React.Component {
       axios.post("/login", form, config)
       .then(
         response => {
-          //successful login
-          window.alert(response.data);
-          //this.props.getUser();
+          this.props.getUser();
         },
         error => {
           window.alert("Invalid Username/Password Combo");
@@ -71,7 +69,7 @@ export class UserControl extends React.Component {
       //show currently logged in user and user setting dropdown
       return (
         <div>
-
+          <h3 className="text-light">{this.props.username}</h3>
         </div>
       );
     }

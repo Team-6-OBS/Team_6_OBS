@@ -1,4 +1,4 @@
-from flask import Flask, render_template, Blueprint, request
+from flask import Flask, render_template, Blueprint, request, make_response
 import jwt
 import sqlalchemy as db
 import pymysql
@@ -47,16 +47,23 @@ def signup():
             epoch_time = int(time.time()) + 3600   #gets the epoch time in UTC this is used as an expiration for JWT and add an hour
             payload = {'username' : test[0][1], 'email' : test[0][2], 'exp' : epoch_time}
             token = jwt.encode(payload, app.config['SECRET'], algorithm='HS256')
-            return token, 200
+            return 'Successfully Created Account', 200
         else:
-            return "Email address already in use", 400
-
-        return "Success!", 200
+            return "Email address or username already in use", 400
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
     if request.method == "GET":
-        return "Success", 404
+        cookie = request.cookies.get('OBS_COOKIE')
+        if cookie == None:
+            return "No User Logged In", 404
+        else:
+            decoded_jwt = authenticate(cookie)
+            if decoded_jwt == 'Access token is missing or invalid':
+                return "No User Logged In", 404
+            else:
+                return decoded_jwt, 200
+
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
@@ -73,10 +80,25 @@ def login():
             epoch_time = int(time.time()) + 3600   #gets the epoch time in UTC this is used as an expiration for JWT and add an hour
             payload = {'username' : test[0][1], 'email' : test[0][2], 'exp': epoch_time}
             token = jwt.encode(payload, app.config['SECRET'], algorithm='HS256')
-            print(token)
-            return token, 200
+            res = make_response()
+            res.set_cookie("OBS_COOKIE", value=token, httponly=True)
+            return res, 200
         else:
             return "Invalid User Credentials", 400
+
+def authenticate(auth):
+    """This function takes a token and returns the unencrypted results or fails"""
+    try:
+        decoded = jwt.decode(auth, app.config['SECRET'], algorithms='HS256')
+        output = {}
+        output['username'] = decoded['username']
+        output['email'] = decoded['email']
+
+    except jwt.ExpiredSignatureError:
+        output = 'Access token is missing or invalid'
+    except jwt.DecodeError:
+        output = 'Access token is missing or invalid'
+    return output
 
 @app.route('/dashboard')
 def dashboard():

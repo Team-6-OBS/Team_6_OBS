@@ -17,7 +17,7 @@ export class Header extends React.Component {
       response => {
         //save user information
         this.setState({
-          username: response.data
+          username: response.data.username
         });
       },
       error => {
@@ -42,9 +42,6 @@ export class Header extends React.Component {
                   <li className="nav-item active">
                     <a className="nav-link" href="/">Home</a>
                   </li>
-                  <li className="nav-item active">
-                    <a className="nav-link" href="/">Link</a>
-                  </li>
                 </ul>
               </div>
               <UserControl username={this.state.username} getUser={this.getUser.bind(this)}/>
@@ -66,13 +63,7 @@ export class Header extends React.Component {
                   <a className="nav-link" href="/">Home</a>
                 </li>
                 <li className="nav-item active">
-                  <a className="nav-link" href="/">Link1</a>
-                </li>
-                <li className="nav-item active">
-                  <a className="nav-link" href="/">Link2</a>
-                </li>
-                <li className="nav-item active">
-                  <a className="nav-link" href="/">Link3</a>
+                  <a className="nav-link" href="/dashboard">Dashboard</a>
                 </li>
               </ul>
             </div>
