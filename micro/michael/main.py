@@ -9,6 +9,28 @@ import jwt
 
 app = Flask(__name__)
 
+def update_totals(amt, price, acc, t_type):
+
+    stock_price_total = amt * price
+
+    sql = 'SELECT dollars, dis_stock FROM account_totals WHERE account = \'' + acc + '\';'
+    values = query_db(sql)
+    dollars = values[0][0]
+    stock = values[0][1]
+
+    if t_type == 'BUY':
+        updated_dollars = dollars - stock_price_total
+        updated_stock = stock + amt
+    else:
+        updated_dollars = dollars + stock_price_total
+        updated_stock = stock - amt
+
+    sql = 'UPDATE account_totals SET dollars = \'' + str(updated_dollars) + '\', '
+    sql += 'dis_stock = \'' + str(updated_stock) + '\''
+    res = query_db(sql)
+
+    return res
+
 def authenticate(auth):
     """This function takes a token and returns the unencrypted results or fails"""
     try:
@@ -28,35 +50,49 @@ def save_to_db(b_type, name, acc, price, amt, stock_inventory, user_inventory):
     if name != '' and acc != '' and float(price) > 0 and int(amt) > 0:
         if b_type == 'BUY':
             if stock_inventory - int(amt) > 0:
-                sql = 'INSERT INTO buy_sell(b_type, username, t_account, price, quantity) '
+                #edit buy_sell values
+                sql = 'INSERT INTO buy_sell(b_type, username, t_account, price, stocktype, quantity) '
                 sql += 'VALUES(\'SELL\', \'admin\', \'Bank Stock Inventory\', \'' + str(price)
-                sql += '\', \'' + str(amt) + '\'),'
+                sql += '\', \'DIS\', \'' + str(amt) + '\'),'
                 sql += '(\'' + b_type + '\', \'' + name + '\', \'' + acc + '\', \''
-                sql += str(price) + '\', \'' + str(amt) + '\');'
+                sql += str(price) + '\', \'DIS\', \'' + str(amt) + '\');'
                 query_db(sql)
+
+                #edit account_totals values
+                update_totals(int(amt), float(price), acc, 'BUY')
+
                 return 'Bought from stock inventory'
 
+            #edit buy_sell values
             required = int(amt) - stock_inventory + 100
-            sql = 'INSERT INTO buy_sell(b_type, username, t_account, price, quantity) '
+            sql = 'INSERT INTO buy_sell(b_type, username, t_account, price, stocktype, quantity) '
             sql += 'VALUES(\'BUY\', \'admin\', \'Bank Stock Inventory\', \'' + str(price)
             sql += '\', \'' + str(required) + '\'),'
             sql += '(\'SELL\', \'admin\', \'Bank Stock Inventory\', \'' + str(price)
-            sql += '\', \'' + str(amt) + '\'),'
+            sql += '\', \'DIS\', \'' + str(amt) + '\'),'
             sql += '(\'' + b_type + '\', \'' + name + '\', \'' + acc + '\', \'' + str(price)
-            sql += '\', \'' + str(amt) + '\');'
+            sql += '\', \'DIS\', \'' + str(amt) + '\');'
             query_db(sql)
+
+            #edit account_totals values
+            update_totals(int(amt), float(price), acc, 'BUY')
 
             ret_str = 'Stock inventory overdrawn, inventory bought'
             ret_str += ' needed amt plus 100 and completed the buy'
             return ret_str
 
         if user_inventory - int(amt) >= 0:
-            sql = 'INSERT INTO buy_sell(b_type, username, t_account, price, quantity) '
+            #edit buy_sell values
+            sql = 'INSERT INTO buy_sell(b_type, username, t_account, price, stocktype, quantity) '
             sql += 'VALUES(\'BUY\', \'admin\', \'Bank Stock Inventory\', \'' + str(price)
-            sql += '\', \'' + str(amt) + '\'),'
+            sql += '\', \'DIS\', \'' + str(amt) + '\'),'
             sql += '(\'' + b_type + '\', \'' + name + '\', \'' + acc + '\', \'' + str(price)
-            sql += '\', \'' + str(amt) + '\');'
+            sql += '\', \'DIS\', \'' + str(amt) + '\');'
             query_db(sql)
+
+            #edit account_totals values
+            update_totals(int(amt), float(price), acc, 'SELL')
+
             return 'Sold to stock inventory'
         return 'User Inventory does not have enough shares to sell the requested amount'
 
@@ -67,12 +103,12 @@ def get_inventory(share_source, share_account):
 
     bought_query = 'SELECT sum(quantity) AS bought FROM buy_sell WHERE '
     bought_query += '(username = \'' + share_source + '\' AND t_account = \'' + share_account
-    bought_query += '\' AND b_type = \'BUY\')'
+    bought_query += '\' AND b_type = \'BUY\' AND stocktype = \'DIS\')'
     bought = query_db(bought_query)[0][0]
 
     sold_query = 'SELECT sum(quantity) AS sold FROM buy_sell WHERE (username '
     sold_query += '= \'' + share_source + '\' AND t_account = \'' + share_account
-    sold_query += '\' AND b_type = \'SELL\')'
+    sold_query += '\' AND b_type = \'SELL\' AND stocktype = \'DIS\')'
     sold = query_db(sold_query)[0][0]
 
     if sold is not None:
@@ -94,7 +130,7 @@ def form_buy_sell_response(b_type, name, acc, price, amt):
     elif b_type == 'SELL':
         output_str = "{\"TransactionType\" : \"SELL\", \"User\" : \"" + name
         output_str += "\", \"Account\" : \"" + acc + "\", \"Price\" : " + str(price)
-        output_str += ", \"Quantity\" : " + str(amt) + ", \"CostToUser\" : " + str(value)+ "}"
+        output_str += ", \"Quantity\" : " + str(amt) + ", \"PaymentToUser\" : " + str(value)+ "}"
 
     try:
         transaction = json.loads(output_str)
@@ -113,7 +149,7 @@ def get_delayed_price():
 
 def query_db(sql):
     """sends a query to the db deciding between a select or insert types"""
-    res = db.create_engine(os.getenv('DB_CONN_STRING_MICHAEL')).connect().execute(sql)
+    res = db.create_engine(os.getenv('DB_CONN')).connect().execute(sql)
 
     if 'SELECT' in sql:
         res = res.fetchall()
@@ -150,9 +186,12 @@ def buy():
     price = get_delayed_price()
 
     if isinstance(user_data, dict):
+        sql = 'SELECT dis_stock FROM account_totals WHERE account = \'' + account + '\''
+        user_stocks = query_db(sql)[0][0]
+
         check = save_to_db('BUY', user_data['username'], account,
                            price, quantity, get_inventory('admin', 'Bank Stock Inventory'),
-                           get_inventory(user_data['username'], account))
+                           user_stocks)
         if check != 'Invalid order amount or quoted price':
            buy_res = form_buy_sell_response('BUY', user_data['username'], account, price, quantity)
            return buy_res, 200
@@ -173,8 +212,11 @@ def sell():
     price = get_delayed_price()
 
     if isinstance(user_data, dict):
+        sql = 'SELECT dis_stock FROM account_totals WHERE account = \'' + account + '\''
+        user_stocks = query_db(sql)[0][0]
+
         check = save_to_db('SELL', user_data['username'], account, price,
-                           quantity, 5000, get_inventory(user_data['username'], account))
+                           quantity, 5000, user_stocks)
         if (check != 'User Inventory does not have enough shares to sell the requested amount'
         and check != 'Invalid order amount or quoted price'):
 
