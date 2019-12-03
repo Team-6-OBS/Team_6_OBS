@@ -26,7 +26,7 @@ def update_totals(amt, price, acc, t_type):
         updated_stock = stock - amt
 
     sql = 'UPDATE account_totals SET dollars = \'' + str(updated_dollars) + '\', '
-    sql += 'dis_stock = \'' + str(updated_stock) + '\''
+    sql += 'dis_stock = \'' + str(updated_stock) + '\' WHERE account = \'' + acc + '\';'
     res = query_db(sql)
 
     return res
@@ -60,6 +60,7 @@ def save_to_db(b_type, name, acc, price, amt, stock_inventory, user_inventory):
 
                 #edit account_totals values
                 update_totals(int(amt), float(price), acc, 'BUY')
+                update_totals(int(amt), float(price), 'Bank Stock Inventory', 'SELL')
 
                 return 'Bought from stock inventory'
 
@@ -76,6 +77,7 @@ def save_to_db(b_type, name, acc, price, amt, stock_inventory, user_inventory):
 
             #edit account_totals values
             update_totals(int(amt), float(price), acc, 'BUY')
+            update_totals(int(amt), float(price), 'Bank Stock Inventory', 'SELL')
 
             ret_str = 'Stock inventory overdrawn, inventory bought'
             ret_str += ' needed amt plus 100 and completed the buy'
@@ -92,6 +94,7 @@ def save_to_db(b_type, name, acc, price, amt, stock_inventory, user_inventory):
 
             #edit account_totals values
             update_totals(int(amt), float(price), acc, 'SELL')
+            update_totals(int(amt), float(price), 'Bank Stock Inventory', 'BUY')
 
             return 'Sold to stock inventory'
         return 'User Inventory does not have enough shares to sell the requested amount'
