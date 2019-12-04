@@ -3,6 +3,8 @@ import jwt
 import sqlalchemy as db
 import pymysql
 import time
+import json
+import http
 
 app = Flask(__name__)
 
@@ -103,6 +105,21 @@ def authenticate(auth):
 @app.route('/dashboard')
 def dashboard():
     return render_template("dashboard.html")
+
+@app.route('/quotes')
+def quotes():
+    conn = http.client.HTTPSConnection('sandbox.tradier.com', 443, timeout=15)
+    bearer_str = 'Bearer ' + 'IymVCsUIpSobaA3RGFqGtWGWzMUQ'
+    headers = {'Accept' : 'application/json', 'Authorization' : bearer_str}
+    quote = json.loads('{}')
+    conn.request('GET', '/v1/markets/quotes?symbols=DIS,NTDOY,ATVI,UBSFY,SGAMY', None, headers)
+    try:
+        res = conn.getresponse()
+        quote = json.loads(res.read().decode('utf-8'))
+    except http.client.HTTPException:
+        return 'Quote request failed', 500
+
+    return quote, 200
 
 @app.route('/welcome')
 def welcome():
