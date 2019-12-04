@@ -1,4 +1,4 @@
-from flask import Flask, render_template, Blueprint, request, make_response
+from flask import Flask, render_template, Blueprint, request, make_response, jsonify
 import jwt
 import sqlalchemy as db
 import pymysql
@@ -146,6 +146,47 @@ def quotes():
         return 'Quote request failed', 500
 
     return quote, 200
+
+@app.route('/totals')
+def total():
+    #try to get the logged in user
+    cookie = request.cookies.get('OBS_COOKIE')
+    cookie = 1
+    if cookie == None:
+        return "No User Logged In", 404
+    else:
+        decoded_jwt = authenticate(cookie)
+        if decoded_jwt == 'Access token is missing or invalid':
+            return "No User Logged In", 404
+
+        #user is logeed in so try and get their dashboard
+        sql = 'SELECT * from account_totals where username = \'' + 'michaelr' + '\''
+        try:
+            accounts = app.config['DB_CONN'].execute(sql).fetchall()
+            nullAccounts = 3 - len(accounts)
+            #loop through each account to build return array
+            retArray = []
+            for account in accounts:
+                newDict = {
+                    'name': account[0],
+                    'money': account[2],
+                    'ntdoy': account[4],
+                    'sgamy': account[5],
+                    'atvi': account[6],
+                    'dis': account[3],
+                    'ubsfy': account[7]
+                }
+                retArray.append(newDict)
+            #loop through remaining slots to fill in null
+            i = 0
+            while i < nullAccounts:
+                retArray.append(None)
+                i+=1
+            #return as json
+            return jsonify(retArray)
+        except Exception as e:
+            print(e)
+            return 'Database error occurred', 500
 
 @app.route('/welcome')
 def welcome():
