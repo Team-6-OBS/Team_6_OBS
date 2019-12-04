@@ -113,7 +113,7 @@ def add_funds():
             return "No User Logged In", 404
 
         money_added = request.form.get('money')
-        if float(money_added) >= 0:
+        if float(money_added) > 0:
             acc = request.form.get('account')
             sql = 'SELECT dollars FROM account_totals WHERE username = \'' + decoded_jwt['username'] + '\' AND account = \'' + acc + '\';'
 
@@ -144,17 +144,20 @@ def create_account():
         current_accounts = app.config['DB_CONN'].execute(sql).fetchall()
 
         exists = False
-        for acc in current_accounts:
-            if acc_name == acc[0]:
-                exists = True
-        
-        if not exists:
-            sql = 'INSERT INTO account_totals(account, username) VALUES(\'' + acc_name +  '\', \'' + decoded_jwt['username'] + '\');'
-            app.config['DB_CONN'].execute(sql)
+        if len(current_accounts) < 3:
+            for acc in current_accounts:
+                if acc_name == acc[0]:
+                    exists = True
+          
+            if not exists:
+                sql = 'INSERT INTO account_totals(account, username) VALUES(\'' + acc_name +  '\', \'' + decoded_jwt['username'] + '\');'
+                app.config['DB_CONN'].execute(sql)
 
-            return 'Account Added Successfully', 200
+                return 'Account Added Successfully', 200
 
-        return 'Account Already Exists', 500
+            return 'Account Already Exists', 500
+
+        return 'User Bank Account Limit Reached', 500
 
 
 @app.route('/dashboard')
