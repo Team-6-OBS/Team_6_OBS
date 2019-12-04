@@ -104,9 +104,9 @@ export class AccountView extends React.Component {
           this.forceUpdate();
         },
         error => {
-          if(error.data == 'Account Already Exists')
+          if(error.response.data === 'Account Already Exists')
             window.alert("User cannot have duplicate account names.");
-          else if(error.data == 'User Bank Account Limit Reached')
+          else if(error.response.data === 'User Bank Account Limit Reached')
             window.alert("User can only have up to 3 accounts at once.");
           else
             window.alert("An error occurred, please try again later.");
