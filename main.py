@@ -102,6 +102,32 @@ def authenticate(auth):
         output = 'Access token is missing or invalid'
     return output
 
+@app.route('/add', methods=["POST"])
+def add_funds():
+    cookie = request.cookies.get('OBS_COOKIE')
+    if cookie == None:
+        return "No User Logged In", 404
+    else:
+        decoded_jwt = authenticate(cookie)
+        if decoded_jwt == 'Access token is missing or invalid':
+            return "No User Logged In", 404
+
+        money_added = request.headers.get('money')
+        if float(money_added) >= 0:
+            acc = request.headers.get('account')
+            sql = 'SELECT dollars FROM account_totals WHERE username = \'' + decoded_jwt['username'] + '\' AND account = \'' + acc + '\''
+
+            dollars = app.config['DB_CONN'].execute(sql).fetchall()[0][0]
+            new_dollars = float(dollars) + float(money_added)
+
+            sql = 'UPDATE account_totals SET dollars = \'' 
+            sql = sql + str(new_dollars) + '\' WHERE username = \'' + decoded_jwt['username'] + '\' AND account = \'' + acc + '\''
+
+            res = app.config['DB_CONN'].execute(sql)
+            return 'Funds Sucessfully Added', 200
+
+    return 'Invalid Addition Amount', 500
+
 @app.route('/dashboard')
 def dashboard():
     return render_template("dashboard.html")
