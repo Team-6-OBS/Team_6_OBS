@@ -20,7 +20,7 @@ app.config['DB_CONN'] = engine.connect()
 ######## BEGIN BUY/SELL HELPER FUNCTIONS ########
 
 def update_totals(amt, price, acc, t_type, sym):
-    
+
     stock_price_total = amt * price
 
     stock_col = sym.lower() + '_stock'
@@ -273,12 +273,21 @@ def total():
 @app.route('/buy', methods=['POST'])
 def buy():
     """take an account and quantity and attempts to purchase that much stock to that account"""
-    auth = request.headers.get('auth')
-    quantity = request.headers.get('quantity')
-    account = request.headers.get('account')
-    stock_symbol = request.headers.get('symbol')
+    #auth = request.headers.get('auth')
+    quantity = request.form.get('quantity')
+    account = request.form.get('account')
+    stock_symbol = request.form.get('symbol')
 
-    user_data = authenticate(auth)
+    cookie = request.cookies.get('OBS_COOKIE')
+    user_data = None
+    if cookie == None:
+        return "No User Logged In", 404
+    else:
+        user_data = authenticate(cookie)
+        if user_data == 'Access token is missing or invalid':
+            return "No User Logged In", 404
+
+    #user_data = authenticate(auth)
 
     price = get_delayed_price(stock_symbol)
 
@@ -305,12 +314,21 @@ def buy():
 @app.route('/sell', methods=['POST'])
 def sell():
     """take an account and quantity and attempts to sell that much stock from that account"""
-    auth = request.headers.get('auth')
-    quantity = request.headers.get('quantity')
-    account = request.headers.get('account')
-    stock_symbol = request.headers.get('symbol')
+    #auth = request.headers.get('auth')
+    quantity = request.form.get('quantity')
+    account = request.form.get('account')
+    stock_symbol = request.form.get('symbol')
 
-    user_data = authenticate(auth)
+    cookie = request.cookies.get('OBS_COOKIE')
+    user_data = None
+    if cookie == None:
+        return "No User Logged In", 404
+    else:
+        user_data = authenticate(cookie)
+        if user_data == 'Access token is missing or invalid':
+            return "No User Logged In", 404
+
+    #user_data = authenticate(auth)
 
     price = get_delayed_price(stock_symbol)
 

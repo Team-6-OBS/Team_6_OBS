@@ -93,26 +93,46 @@ export class AccountTable extends React.Component {
     ammountToBuy = this.TryParseInt(ammountToBuy);
     //attempt to buy the stock
     if(ammountToBuy > 0 && ammountToBuy*currentStockPrice <= this.props.accountInfo.money){
-      //TODO call api route to buy stcok into this account then update based on response
-      this.props.accountInfo.money -= ammountToBuy*currentStockPrice;
-      this.props.accountInfo.money = this.TryParseDouble(this.props.accountInfo.money.toFixed(2));
+      //call api route to buy stcok into this account then update based on response
+      var form = new FormData();
+      form.set('account', this.props.accountInfo.name);
+      form.set('symbol', symbol.toUpperCase());
+      form.set('quantity', ammountToBuy);
 
-      if(symbol === "ntdoy"){
-        this.props.accountInfo.ntdoy += ammountToBuy;
-      }
-      else if(symbol === "sgamy") {
-        this.props.accountInfo.sgamy += ammountToBuy;
-      }
-      else if(symbol === "dis") {
-        this.props.accountInfo.dis += ammountToBuy;
-      }
-      else if(symbol === "atvi") {
-        this.props.accountInfo.atvi += ammountToBuy;
-      }
-      else if(symbol === "ubsfy") {
-        this.props.accountInfo.ubsfy += ammountToBuy;
-      }
-      this.forceUpdate();
+      const config = {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      };
+
+      axios.post('/buy', form, config)
+      .then(
+        response => {
+          this.props.accountInfo.money -= ammountToBuy*currentStockPrice;
+          this.props.accountInfo.money = this.TryParseDouble(this.props.accountInfo.money.toFixed(2));
+
+          if(symbol === "ntdoy"){
+            this.props.accountInfo.ntdoy += ammountToBuy;
+          }
+          else if(symbol === "sgamy") {
+            this.props.accountInfo.sgamy += ammountToBuy;
+          }
+          else if(symbol === "dis") {
+            this.props.accountInfo.dis += ammountToBuy;
+          }
+          else if(symbol === "atvi") {
+            this.props.accountInfo.atvi += ammountToBuy;
+          }
+          else if(symbol === "ubsfy") {
+            this.props.accountInfo.ubsfy += ammountToBuy;
+          }
+          this.forceUpdate();
+        },
+        error => {
+          window.alert("An error occured. Please check that you have enough money in your account to make this purchase.");
+        }
+      );
+
     }
   }
 
@@ -158,25 +178,48 @@ export class AccountTable extends React.Component {
     //attempt to buy the stock
     if(ammountToSell > 0 && ammountToSell <= currentOwned){
       //TODO call api route to sell stcok from this account then update based on response
-      this.props.accountInfo.money += ammountToSell*currentStockPrice;
-      this.props.accountInfo.money = this.TryParseDouble(this.props.accountInfo.money.toFixed(2));
+      var form = new FormData();
+      form.set('account', this.props.accountInfo.name);
+      form.set('symbol', symbol.toUpperCase());
+      form.set('quantity', ammountToSell);
 
-      if(symbol === "ntdoy"){
-        this.props.accountInfo.ntdoy -= ammountToSell;
-      }
-      else if(symbol === "sgamy") {
-        this.props.accountInfo.sgamy -= ammountToSell;
-      }
-      else if(symbol === "dis") {
-        this.props.accountInfo.dis -= ammountToSell;
-      }
-      else if(symbol === "atvi") {
-        this.props.accountInfo.atvi -= ammountToSell;
-      }
-      else if(symbol === "ubsfy") {
-        this.props.accountInfo.ubsfy -= ammountToSell;
-      }
-      this.forceUpdate();
+      const config = {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      };
+
+      axios.post('/sell', form, config)
+      .then(
+        response => {
+          this.props.accountInfo.money += ammountToSell*currentStockPrice;
+          this.props.accountInfo.money = this.TryParseDouble(this.props.accountInfo.money.toFixed(2));
+
+          if(symbol === "ntdoy"){
+            this.props.accountInfo.ntdoy -= ammountToSell;
+          }
+          else if(symbol === "sgamy") {
+            this.props.accountInfo.sgamy -= ammountToSell;
+          }
+          else if(symbol === "dis") {
+            this.props.accountInfo.dis -= ammountToSell;
+          }
+          else if(symbol === "atvi") {
+            this.props.accountInfo.atvi -= ammountToSell;
+          }
+          else if(symbol === "ubsfy") {
+            this.props.accountInfo.ubsfy -= ammountToSell;
+          }
+          this.forceUpdate();
+        },
+        error => {
+          if(error.response.data === 'User Inventory does not have enough shares to sell the requested amount')
+            window.alert("You do not enough stocks to sell.");
+          else
+            window.alert("Something went wrong. Please try again later.");
+        }
+      );
+
     }
   }
 
