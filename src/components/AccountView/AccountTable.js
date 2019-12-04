@@ -51,23 +51,23 @@ export class AccountTable extends React.Component {
     //get which type to buy and current price to check if they have enough $
     if(e.target.className.includes("ntdoy")){
       symbol = "ntdoy";
-      currentStockPrice = this.props.accountInfo.ntdoy.value;
+      currentStockPrice = this.props.quotes.ntdoy;
     }
     else if(e.target.className.includes("sgamy")){
       symbol = "sgamy";
-      currentStockPrice = this.props.accountInfo.sgamy.value;
+      currentStockPrice = this.props.quotes.sgamy;
     }
     else if(e.target.className.includes("dis")){
       symbol = "dis";
-      currentStockPrice = this.props.accountInfo.dis.value;
+      currentStockPrice = this.props.quotes.dis;
     }
     else if(e.target.className.includes("atvi")){
       symbol = "atvi";
-      currentStockPrice = this.props.accountInfo.atvi.value;
+      currentStockPrice = this.props.quotes.atvi;
     }
     else if(e.target.className.includes("ubsfy")){
       symbol = "ubsfy";
-      currentStockPrice = this.props.accountInfo.ubsfy.value;
+      currentStockPrice = this.props.quotes.ubsfy;
     }
 
     //get amount to buy from user
@@ -80,19 +80,19 @@ export class AccountTable extends React.Component {
       this.props.accountInfo.money = this.TryParseDouble(this.props.accountInfo.money.toFixed(2));
 
       if(symbol === "ntdoy"){
-        this.props.accountInfo.ntdoy.owned += ammountToBuy;
+        this.props.accountInfo.ntdoy += ammountToBuy;
       }
       else if(symbol === "sgamy") {
-        this.props.accountInfo.sgamy.owned += ammountToBuy;
+        this.props.accountInfo.sgamy += ammountToBuy;
       }
       else if(symbol === "dis") {
-        this.props.accountInfo.dis.owned += ammountToBuy;
+        this.props.accountInfo.dis += ammountToBuy;
       }
       else if(symbol === "atvi") {
-        this.props.accountInfo.atvi.owned += ammountToBuy;
+        this.props.accountInfo.atvi += ammountToBuy;
       }
       else if(symbol === "ubsfy") {
-        this.props.accountInfo.ubsfy.owned += ammountToBuy;
+        this.props.accountInfo.ubsfy += ammountToBuy;
       }
       this.forceUpdate();
     }
@@ -110,28 +110,28 @@ export class AccountTable extends React.Component {
     //get which type to buy and current price to check if they have enough $
     if(e.target.className.includes("ntdoy")){
       symbol = "ntdoy";
-      currentStockPrice = this.props.accountInfo.ntdoy.value;
-      currentOwned = this.props.accountInfo.ntdoy.owned;
+      currentStockPrice = this.props.quotes.ntdoy;
+      currentOwned = this.props.accountInfo.ntdoy;
     }
     else if(e.target.className.includes("sgamy")){
       symbol = "sgamy";
-      currentStockPrice = this.props.accountInfo.sgamy.value;
-      currentOwned = this.props.accountInfo.sgamy.owned;
+      currentStockPrice = this.props.quotes.sgamy;
+      currentOwned = this.props.accountInfo.sgamy;
     }
     else if(e.target.className.includes("dis")){
       symbol = "dis";
-      currentStockPrice = this.props.accountInfo.dis.value;
-      currentOwned = this.props.accountInfo.dis.owned;
+      currentStockPrice = this.props.quotes.dis;
+      currentOwned = this.props.accountInfo.dis;
     }
     else if(e.target.className.includes("atvi")){
       symbol = "atvi";
-      currentStockPrice = this.props.accountInfo.atvi.value;
-      currentOwned = this.props.accountInfo.atvi.owned;
+      currentStockPrice = this.props.quotes.atvi;
+      currentOwned = this.props.accountInfo.atvi;
     }
     else if(e.target.className.includes("ubsfy")){
       symbol = "ubsfy";
-      currentStockPrice = this.props.accountInfo.ubsfy.value;
-      currentOwned = this.props.accountInfo.ubsfy.owned;
+      currentStockPrice = this.props.quotes.ubsfy;
+      currentOwned = this.props.accountInfo.ubsfy;
     }
 
     //get amount to buy from user
@@ -144,19 +144,19 @@ export class AccountTable extends React.Component {
       this.props.accountInfo.money = this.TryParseDouble(this.props.accountInfo.money.toFixed(2));
 
       if(symbol === "ntdoy"){
-        this.props.accountInfo.ntdoy.owned -= ammountToSell;
+        this.props.accountInfo.ntdoy -= ammountToSell;
       }
       else if(symbol === "sgamy") {
-        this.props.accountInfo.sgamy.owned -= ammountToSell;
+        this.props.accountInfo.sgamy -= ammountToSell;
       }
       else if(symbol === "dis") {
-        this.props.accountInfo.dis.owned -= ammountToSell;
+        this.props.accountInfo.dis -= ammountToSell;
       }
       else if(symbol === "atvi") {
-        this.props.accountInfo.atvi.owned -= ammountToSell;
+        this.props.accountInfo.atvi -= ammountToSell;
       }
       else if(symbol === "ubsfy") {
-        this.props.accountInfo.ubsfy.owned -= ammountToSell;
+        this.props.accountInfo.ubsfy -= ammountToSell;
       }
       this.forceUpdate();
     }
@@ -212,9 +212,9 @@ export class AccountTable extends React.Component {
             <tbody>
               <tr className="ntdoy">
                 <td>NTDOY</td>
-                <td>{this.props.accountInfo.ntdoy.owned}</td>
-                <td>{this.props.accountInfo.ntdoy.value}</td>
-                <td>{(this.props.accountInfo.ntdoy.owned*this.props.accountInfo.ntdoy.value).toFixed(2)}</td>
+                <td>{this.props.accountInfo.ntdoy}</td>
+                <td>{this.props.quotes.ntdoy}</td>
+                <td>{(this.props.accountInfo.ntdoy*this.props.quotes.ntdoy).toFixed(2)}</td>
                 <td>
                   <button type="button" className="btn btn-primary ntdoy buy" onClick={this.buyStock}>Buy</button>
                   <button type="button" className="btn btn-primary ntdoy sell" onClick={this.sellStock}>Sell</button>
@@ -222,9 +222,9 @@ export class AccountTable extends React.Component {
               </tr>
               <tr className="sgamy">
                 <td>SGAMY</td>
-                <td>{this.props.accountInfo.sgamy.owned}</td>
-                <td>{this.props.accountInfo.sgamy.value}</td>
-                <td>{(this.props.accountInfo.sgamy.owned*this.props.accountInfo.sgamy.value).toFixed(2)}</td>
+                <td>{this.props.accountInfo.sgamy}</td>
+                <td>{this.props.quotes.sgamy}</td>
+                <td>{(this.props.accountInfo.sgamy*this.props.quotes.sgamy).toFixed(2)}</td>
                 <td>
                   <button type="button" className="btn btn-primary sgamy buy" onClick={this.buyStock}>Buy</button>
                   <button type="button" className="btn btn-primary sgamy sell" onClick={this.sellStock}>Sell</button>
@@ -232,9 +232,9 @@ export class AccountTable extends React.Component {
               </tr>
               <tr className="atvi">
                 <td>ATVI</td>
-                <td>{this.props.accountInfo.atvi.owned}</td>
-                <td>{this.props.accountInfo.atvi.value}</td>
-                <td>{(this.props.accountInfo.atvi.owned*this.props.accountInfo.atvi.value).toFixed(2)}</td>
+                <td>{this.props.accountInfo.atvi}</td>
+                <td>{this.props.quotes.atvi}</td>
+                <td>{(this.props.accountInfo.atvi*this.props.quotes.atvi).toFixed(2)}</td>
                 <td>
                   <button type="button" className="btn btn-primary atvi buy" onClick={this.buyStock}>Buy</button>
                   <button type="button" className="btn btn-primary atvi sell" onClick={this.sellStock}>Sell</button>
@@ -242,9 +242,9 @@ export class AccountTable extends React.Component {
               </tr>
               <tr className="dis">
                 <td>DIS</td>
-                <td>{this.props.accountInfo.dis.owned}</td>
-                <td>{this.props.accountInfo.dis.value}</td>
-                <td>{(this.props.accountInfo.dis.owned*this.props.accountInfo.dis.value).toFixed(2)}</td>
+                <td>{this.props.accountInfo.dis}</td>
+                <td>{this.props.quotes.dis}</td>
+                <td>{(this.props.accountInfo.dis*this.props.quotes.dis).toFixed(2)}</td>
                 <td>
                   <button type="button" className="btn btn-primary dis buy" onClick={this.buyStock}>Buy</button>
                   <button type="button" className="btn btn-primary dis sell" onClick={this.sellStock}>Sell</button>
@@ -252,9 +252,9 @@ export class AccountTable extends React.Component {
               </tr>
               <tr className="ubsfy">
                 <td>UBSFY</td>
-                <td>{this.props.accountInfo.ubsfy.owned}</td>
-                <td>{this.props.accountInfo.ubsfy.value}</td>
-                <td>{(this.props.accountInfo.ubsfy.owned*this.props.accountInfo.ubsfy.value).toFixed(2)}</td>
+                <td>{this.props.accountInfo.ubsfy}</td>
+                <td>{this.props.quotes.ubsfy}</td>
+                <td>{(this.props.accountInfo.ubsfy*this.props.quotes.ubsfy).toFixed(2)}</td>
                 <td>
                   <button type="button" className="btn btn-primary ubsfy buy" onClick={this.buyStock}>Buy</button>
                   <button type="button" className="btn btn-primary ubsfy sell" onClick={this.sellStock}>Sell</button>
