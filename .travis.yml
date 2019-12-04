@@ -28,6 +28,8 @@ jobs:
       script: pytest micro/carlos
     -
       script: pytest main_test.py
+    -
+      script: node_modules/.bin/cypress cypress run "cypress/integration/sample_spec.js"
     - stage: linting
       script:
         - pylint -E micro/adam/main.py
