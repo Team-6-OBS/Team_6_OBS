@@ -120,7 +120,7 @@ def add_funds():
             dollars = app.config['DB_CONN'].execute(sql).fetchall()[0][0]
             new_dollars = float(dollars) + float(money_added)
 
-            sql = 'UPDATE account_totals SET dollars = \'' 
+            sql = 'UPDATE account_totals SET dollars = \''
             sql = sql + str(new_dollars) + '\' WHERE username = \'' + decoded_jwt['username'] + '\' AND account = \'' + acc + '\''
 
             res = app.config['DB_CONN'].execute(sql)
@@ -138,7 +138,7 @@ def quotes():
     bearer_str = 'Bearer ' + 'IymVCsUIpSobaA3RGFqGtWGWzMUQ'
     headers = {'Accept' : 'application/json', 'Authorization' : bearer_str}
     quote = json.loads('{}')
-    conn.request('GET', '/v1/markets/quotes?symbols=DIS,NTDOY,ATVI,UBSFY,SGAMY', None, headers)
+    conn.request('GET', '/v1/markets/quotes?symbols=NTDOY,DIS,ATVI,SGAMY,UBSFY', None, headers)
     try:
         res = conn.getresponse()
         quote = json.loads(res.read().decode('utf-8'))
