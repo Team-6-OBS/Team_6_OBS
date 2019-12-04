@@ -120,7 +120,7 @@ def add_funds():
             dollars = app.config['DB_CONN'].execute(sql).fetchall()[0][0]
             new_dollars = round(float(dollars) + float(money_added), 2)
 
-            sql = 'UPDATE account_totals SET dollars = \'' 
+            sql = 'UPDATE account_totals SET dollars = \''
             sql = sql + str(new_dollars) + '\' WHERE username = \'' + decoded_jwt['username'] + '\' AND account = \'' + acc + '\';'
 
             res = app.config['DB_CONN'].execute(sql)
@@ -139,7 +139,7 @@ def create_account():
             return "No User Logged In", 404
 
         acc_name = request.form.get('account')
-        
+
         sql = 'SELECT account from account_totals WHERE username = \'' + decoded_jwt['username'] + '\';'
         current_accounts = app.config['DB_CONN'].execute(sql).fetchall()
 
@@ -148,7 +148,7 @@ def create_account():
             for acc in current_accounts:
                 if acc_name == acc[0]:
                     exists = True
-          
+
             if not exists:
                 sql = 'INSERT INTO account_totals(account, username) VALUES(\'' + acc_name +  '\', \'' + decoded_jwt['username'] + '\');'
                 app.config['DB_CONN'].execute(sql)
@@ -183,7 +183,6 @@ def quotes():
 def total():
     #try to get the logged in user
     cookie = request.cookies.get('OBS_COOKIE')
-    cookie = 1
     if cookie == None:
         return "No User Logged In", 404
     else:
@@ -192,7 +191,7 @@ def total():
             return "No User Logged In", 404
 
         #user is logeed in so try and get their dashboard
-        sql = 'SELECT * from account_totals where username = \'' + 'michaelr' + '\''
+        sql = 'SELECT * from account_totals where username = \'' + decoded_jwt['username'] + '\''
         try:
             accounts = app.config['DB_CONN'].execute(sql).fetchall()
             nullAccounts = 3 - len(accounts)

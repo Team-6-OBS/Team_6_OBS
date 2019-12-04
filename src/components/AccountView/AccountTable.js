@@ -1,6 +1,6 @@
 import React from "react";
 import {render} from "react-dom";
-//import axios from "axios";
+import axios from "axios";
 
 export class AccountTable extends React.Component {
   constructor(props) {
@@ -20,7 +20,6 @@ export class AccountTable extends React.Component {
 
     if(accName !== null && accName !== ""){
       //create new account with this name for the currently logged in user
-      //TODO call an api function and wait for response
       this.props.newAccountCreated(accName);
       this.forceUpdate();
     }
@@ -33,10 +32,29 @@ export class AccountTable extends React.Component {
     addMoney = addMoney.toFixed(2);
     addMoney = this.TryParseDouble(addMoney);
     if(addMoney > 0){
-      //TODO call api to add money in database
-      this.props.accountInfo.money += addMoney;
-      this.props.accountInfo.money = this.TryParseDouble(this.props.accountInfo.money.toFixed(2));
-      this.forceUpdate();
+      //call api to add money in database
+      var form = new FormData();
+      form.set('account', this.props.accountInfo.name);
+      form.set('money', addMoney);
+
+      const config = {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      };
+
+      axios.post('/add', form, config)
+      .then(
+        response => {
+          //find the first null in accounts array to append new table to
+          this.props.accountInfo.money += addMoney;
+          this.props.accountInfo.money = this.TryParseDouble(this.props.accountInfo.money.toFixed(2));
+          this.forceUpdate();
+        },
+        error => {
+          window.alert("An error occurred, please try again later.");
+        }
+      );
     }
   }
 

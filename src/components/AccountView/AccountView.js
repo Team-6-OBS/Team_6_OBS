@@ -27,32 +27,10 @@ export class AccountView extends React.Component {
   }
 
   componentDidMount(){
+    //get stock prices
     this.getQuotes();
-    //TODO axios get account information
-    //currently hardcoded to get the format correct
-    this.accounts = [{
-      name: 'Account1',
-      money: 1125.56,
-      ntdoy: 1,
-      sgamy: 2,
-      atvi: 3,
-      dis: 4,
-      ubsfy: 5
-    },
-    {
-      name: 'Account2',
-      money: 2000.75,
-      ntdoy: 0,
-      sgamy: 0,
-      atvi: 3,
-      dis: 3,
-      ubsfy: 15
-    },
-      null
-    ];
-
-    //set state to render the account info after request complete
-    this.setState({receivedAccountInfo: true});
+    //get users current accounts
+    this.getAccounts();
   }
 
   getQuotes(){
@@ -75,26 +53,65 @@ export class AccountView extends React.Component {
     );
   }
 
+  getAccounts(){
+    axios.get("/totals").then(
+      response => {
+        //set the quote prices from response
+        this.accounts = response.data;
+
+        this.setState({
+          receivedAccountInfo: true
+        });
+      },
+      error => {
+        //could not get quotes
+      }
+    );
+  }
+
   //this will be called from child component to force an update whenenver a
   //new table need to be rendered
   newAccountCreated(accName){
-    //find the first null in accounts array to append new table to
-    for(let i = 0; i < 3; i++){
-      if(this.accounts[i] === null){
-        //TODO add this account to database then update based on response
-        this.accounts[i] = {
-          name: accName,
-          money: 0.0,
-          ntdoy: 0,
-          sgamy: 0,
-          atvi: 0,
-          dis: 0,
-          ubsfy: 0
-        };
-        break;
-      }
-    }
-    this.forceUpdate();
+    //post data to signup endpoint using axios
+      var form = new FormData();
+      form.set('account', accName);
+
+      const config = {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      };
+
+      axios.post('/newacc', form, config)
+      .then(
+        response => {
+          //find the first null in accounts array to append new table to
+          for(let i = 0; i < 3; i++){
+            if(this.accounts[i] === null){
+              //Add this account to the table
+              this.accounts[i] = {
+                name: accName,
+                money: 0.0,
+                ntdoy: 0,
+                sgamy: 0,
+                atvi: 0,
+                dis: 0,
+                ubsfy: 0
+              };
+              break;
+            }
+          }
+          this.forceUpdate();
+        },
+        error => {
+          if(error.data == 'Account Already Exists')
+            window.alert("User cannot have duplicate account names.");
+          else if(error.data == 'User Bank Account Limit Reached')
+            window.alert("User can only have up to 3 accounts at once.");
+          else
+            window.alert("An error occurred, please try again later.");
+        }
+      );
   }
 
   render () {
