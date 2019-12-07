@@ -17,15 +17,29 @@ app.config['DB_NAME'] = "main_server"
 engine = db.create_engine('mysql+pymysql://' + app.config['DB_USER'] + ':' + app.config['DB_PASS'] + '@' + app.config['DB_HOST'] + '/' + app.config['DB_NAME'], pool_pre_ping=True)
 app.config['DB_CONN'] = engine.connect()
 
+######## BEGIN LOG FUNCTION #########
+
+def log_app_transaction(t_type, t_response, log_text, req_type):
+
+    sql = 'INSERT INTO logs(type, response, log, request) VALUES (\'' + str(t_type) + '\', '
+    sql = sql + '\'' + str(t_response) + '\', ' + '\'' + str(log_text) + '\', ' + '\'' + str(req_type) + '\')'
+    res = query_db(sql)
+
+    return(res)
+
+######## END LOG FUNCTION ########
+
+
+
 ######## BEGIN BUY/SELL HELPER FUNCTIONS ########
 
-def update_totals(amt, price, acc, t_type, sym):
+def update_totals(amt, price, acc, t_type, sym, user):
 
     stock_price_total = amt * price
 
     stock_col = sym.lower() + '_stock'
 
-    sql = 'SELECT dollars, ' + stock_col + ' FROM account_totals WHERE account = \'' + acc + '\';'
+    sql = 'SELECT dollars, ' + stock_col + ' FROM account_totals WHERE account = \'' + acc + '\' AND username = \'' + user + '\';'
     values = query_db(sql)
     dollars = values[0][0]
     stock = values[0][1]
@@ -38,7 +52,7 @@ def update_totals(amt, price, acc, t_type, sym):
         updated_stock = stock - amt
 
     sql = 'UPDATE account_totals SET dollars = \'' + str(updated_dollars) + '\', '
-    sql += stock_col + '= \'' + str(updated_stock) + '\' WHERE account = \'' + acc + '\';'
+    sql += stock_col + '= \'' + str(updated_stock) + '\' WHERE account = \'' + acc + '\' AND username = \'' + user + '\';'
     res = query_db(sql)
 
     return res
@@ -71,8 +85,8 @@ def save_to_db(b_type, name, acc, price, amt, stock_inventory, user_inventory, s
                 query_db(sql)
 
                 #edit account_totals values
-                update_totals(int(amt), float(price), acc, 'BUY', sym)
-                update_totals(int(amt), float(price), 'Bank Stock Inventory', 'SELL', sym)
+                update_totals(int(amt), float(price), acc, 'BUY', sym, name)
+                update_totals(int(amt), float(price), 'Bank Stock Inventory', 'SELL', sym, 'admin')
 
                 return 'Bought from stock inventory'
 
@@ -88,8 +102,8 @@ def save_to_db(b_type, name, acc, price, amt, stock_inventory, user_inventory, s
             query_db(sql)
 
             #edit account_totals values
-            update_totals(int(amt), float(price), acc, 'BUY', sym)
-            update_totals(int(amt), float(price), 'Bank Stock Inventory', 'SELL', sym)
+            update_totals(int(amt), float(price), acc, 'BUY', sym, name)
+            update_totals(int(amt), float(price), 'Bank Stock Inventory', 'SELL', sym, 'admin')
 
             ret_str = 'Stock inventory overdrawn, inventory bought'
             ret_str += ' needed amt plus 100 and completed the buy'
@@ -105,8 +119,8 @@ def save_to_db(b_type, name, acc, price, amt, stock_inventory, user_inventory, s
             query_db(sql)
 
             #edit account_totals values
-            update_totals(int(amt), float(price), acc, 'SELL', sym)
-            update_totals(int(amt), float(price), 'Bank Stock Inventory', 'BUY', sym)
+            update_totals(int(amt), float(price), acc, 'SELL', sym, name)
+            update_totals(int(amt), float(price), 'Bank Stock Inventory', 'BUY', sym, 'admin')
 
             return 'Sold to stock inventory'
         return 'User Inventory does not have enough shares to sell the requested amount'
@@ -139,6 +153,7 @@ def get_delayed_price(stock):
 
     res = quotes()
     new_res = res[0]['quotes']['quote']
+    delayed = 0.0
     for item in new_res:
         if item['symbol'] == stock:
             delayed = round(float(item['last']), 2)
@@ -162,10 +177,12 @@ def query_db(sql):
 def add_funds():
     cookie = request.cookies.get('OBS_COOKIE')
     if cookie == None:
+        log_app_transaction('OBS', 'No User Logged In', 'Dashboard Add Funds Button', request.method)
         return "No User Logged In", 404
     else:
         decoded_jwt = authenticate(cookie)
         if decoded_jwt == 'Access token is missing or invalid':
+            log_app_transaction('OBS', 'Access token is missing or invalid', 'Dashboard Add Funds Button', request.method)
             return "No User Logged In", 404
 
         money_added = request.form.get('money')
@@ -180,18 +197,23 @@ def add_funds():
             sql = sql + str(new_dollars) + '\' WHERE username = \'' + decoded_jwt['username'] + '\' AND account = \'' + acc + '\';'
 
             res = app.config['DB_CONN'].execute(sql)
+
+            log_app_transaction('OBS', 'Funds Successfully Added', 'Dashboard Add Funds Button', request.method)
             return 'Funds Sucessfully Added', 200
 
+    log_app_transaction('OBS', 'Invalid Addition Amount', 'Dashboard Add Funds Button', request.method)
     return 'Invalid Addition Amount', 500
 
 @app.route('/newacc', methods=["POST"])
 def create_account():
     cookie = request.cookies.get('OBS_COOKIE')
     if cookie == None:
+        log_app_transaction('OBS', 'No User Logged In', 'Dashboard Creat Account Button', request.method)
         return "No User Logged In", 404
     else:
         decoded_jwt = authenticate(cookie)
         if decoded_jwt == 'Access token is missing or invalid':
+            log_app_transaction('OBS', 'Access token is missing or invalid', 'Dashboard Create Account Button', request.method)
             return "No User Logged In", 404
 
         acc_name = request.form.get('account')
@@ -209,10 +231,13 @@ def create_account():
                 sql = 'INSERT INTO account_totals(account, username) VALUES(\'' + acc_name +  '\', \'' + decoded_jwt['username'] + '\');'
                 app.config['DB_CONN'].execute(sql)
 
+                log_app_transaction('OBS', 'Account Added Successfully', 'Dashboard Create Account Button', request.method)
                 return 'Account Added Successfully', 200
 
+            log_app_transaction('OBS', 'Account Already Exists', 'Dashboard Create Account Button', request.method)
             return 'Account Already Exists', 500
 
+        log_app_transaction('OBS', 'User Bank Account Limit Reached', 'Dashboard Create Account Button', request.method)
         return 'User Bank Account Limit Reached', 500
 
 @app.route('/quotes')
@@ -281,13 +306,15 @@ def buy():
     cookie = request.cookies.get('OBS_COOKIE')
     user_data = None
     if cookie == None:
+
+        log_app_transaction('AUTH', 'No User Logged In', 'Dashboard Buy Button', request.method)
         return "No User Logged In", 404
     else:
         user_data = authenticate(cookie)
         if user_data == 'Access token is missing or invalid':
-            return "No User Logged In", 404
 
-    #user_data = authenticate(auth)
+            log_app_transaction('AUTH', 'Access token is missing or invalid', 'Dashboard Buy Button', request.method)
+            return "No User Logged In", 404
 
     price = get_delayed_price(stock_symbol)
 
@@ -305,16 +332,16 @@ def buy():
                            user_stocks, stock_symbol)
         if check != 'Invalid order amount or quoted price':
            buy_res = form_buy_sell_response('BUY', user_data['username'], account, price, quantity)
+
+           log_app_transaction('STOCK', 'Buy Successful', 'Dashboard Buy Button', request.method)
            return buy_res, 200
 
+        log_app_transaction('STOCK', 'Invalid order amount or quoted price', 'Dashboard Buy Button', request.method)
         return check, 500
-
-    return user_data, 401
 
 @app.route('/sell', methods=['POST'])
 def sell():
     """take an account and quantity and attempts to sell that much stock from that account"""
-    #auth = request.headers.get('auth')
     quantity = request.form.get('quantity')
     account = request.form.get('account')
     stock_symbol = request.form.get('symbol')
@@ -322,13 +349,15 @@ def sell():
     cookie = request.cookies.get('OBS_COOKIE')
     user_data = None
     if cookie == None:
+
+        log_app_transaction('STOCK', 'No User Logged In', 'Dashboard Sell Button', request.method)
         return "No User Logged In", 404
     else:
         user_data = authenticate(cookie)
         if user_data == 'Access token is missing or invalid':
-            return "No User Logged In", 404
 
-    #user_data = authenticate(auth)
+            log_app_transaction('STOCK', 'Access token is missing or invalid', 'Dashboard Sell Button', request.method)
+            return "No User Logged In", 404
 
     price = get_delayed_price(stock_symbol)
 
@@ -344,11 +373,12 @@ def sell():
         and check != 'Invalid order amount or quoted price'):
 
            sell_res = form_buy_sell_response('SELL', user_data['username'], account, price, quantity)
+
+           log_app_transaction('STOCK', 'Sell Successful', 'Dashboard Sell Button', request.method)
            return sell_res, 200
 
+        log_app_transaction('STOCK', check, 'Dashboard Sell Button', request.method)
         return check, 500
-
-    return user_data, 401
 
 ######## END DASHBOARD FUNCTIONS ########
 
@@ -363,6 +393,7 @@ def home():
 def signup():
     if request.method == "GET":
         return render_template("signup.html")
+
     if request.method == "POST":
         username = request.form.get("username", None)
         password = request.form.get("password", None)
@@ -370,6 +401,7 @@ def signup():
 
         #check whether all the data was passed in properly
         if username == None or password == None or email == None:
+            log_app_transaction('Auth', 'Failed Request', 'User Sign Up Page', request.method)
             return "Failed Request", 404
 
         #check database for existing user
@@ -387,8 +419,11 @@ def signup():
             epoch_time = int(time.time()) + 3600   #gets the epoch time in UTC this is used as an expiration for JWT and add an hour
             payload = {'username' : test[0][0], 'email' : test[0][1], 'exp' : epoch_time}
             token = jwt.encode(payload, app.config['SECRET'], algorithm='HS256')
+
+            log_app_transaction('AUTH', 'Successfully Created Account', 'User Sign Up Page', request.method)
             return 'Successfully Created Account', 200
         else:
+            log_app_transaction('AUTH', 'Email address or username already in use', 'User Sign Up Page', request.method)
             return "Email address or username already in use", 400
 
 @app.route('/login', methods=["GET", "POST"])
@@ -396,12 +431,15 @@ def login():
     if request.method == "GET":
         cookie = request.cookies.get('OBS_COOKIE')
         if cookie == None:
+            log_app_transaction('AUTH', 'No User Logged In', 'User Login Page', request.method)
             return "No User Logged In", 404
         else:
             decoded_jwt = authenticate(cookie)
             if decoded_jwt == 'Access token is missing or invalid':
+                log_app_transaction('AUTH', 'No User Logged In', 'User Login Page', request.method)
                 return "No User Logged In", 404
             else:
+                log_app_transaction('AUTH', 'Account Logged In Successfully', 'User Login Page', request.method)
                 return decoded_jwt, 200
 
     if request.method == "POST":
@@ -410,6 +448,7 @@ def login():
 
         #check whether all the data was passed in properly
         if username == None or password == None:
+            log_app_transaction('AUTH', 'Failed Request', 'User Login Page', request.method)
             return "Failed Request", 404
 
         sql = 'SELECT * FROM accounts WHERE username=\'' + username + '\' AND password=\'' + password + '\''
@@ -422,8 +461,11 @@ def login():
             token = jwt.encode(payload, app.config['SECRET'], algorithm='HS256')
             res = make_response()
             res.set_cookie("OBS_COOKIE", value=token, httponly=True)
+
+            log_app_transaction('AUTH', 'User Logged In Successfully', 'User Login Page', request.method)
             return res, 200
         else:
+            log_app_transaction('AUTH', 'Invalid User Credentials', 'User Login Page', request.method)
             return "Invalid User Credentials", 400
 
 @app.route('/dashboard')
