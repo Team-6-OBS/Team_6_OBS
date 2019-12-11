@@ -54,6 +54,29 @@ export class Header extends React.Component {
         <></>
       );
     }
+    else if(this.state.username === "admin"){
+      return (
+        <nav className="navbar navbar-expand-md navbar-dark bg-dark justify-content-between">
+            <div className="navbar-header">
+              <ul className="navbar-nav mr-auto">
+                <li className="nav-item active">
+                  <a className="nav-link" href="/">Home</a>
+                </li>
+                <li className="nav-item active">
+                  <a className="nav-link" href="/dashboard">Dashboard</a>
+                </li>
+                <li className="nav-item active">
+                  <a className="nav-link" href="/logs">Logs</a>
+                </li>
+                <li className="nav-item active">
+                  <a className="nav-link" href="/">P&L</a>
+                </li>
+              </ul>
+            </div>
+            <UserControl username={this.state.username}/>
+        </nav>
+      );
+    }
     else{
       return(
         <nav className="navbar navbar-expand-md navbar-dark bg-dark justify-content-between">
