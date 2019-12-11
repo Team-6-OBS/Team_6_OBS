@@ -426,8 +426,14 @@ def signup():
             log_app_transaction('AUTH', 'Email address or username already in use', 'User Sign Up Page', request.method)
             return "Email address or username already in use", 400
 
-@app.route('/login', methods=["GET", "POST"])
+@app.route('/login', methods=["GET", "POST", "DELETE"])
 def login():
+    if request.method == "DELETE":
+        #clear the cookie that saves user logged in
+        res = make_response()
+        res.set_cookie("OBS_COOKIE", value="", httponly=True, expires=0)
+        return res, 200
+
     if request.method == "GET":
         cookie = request.cookies.get('OBS_COOKIE')
         if cookie == None:

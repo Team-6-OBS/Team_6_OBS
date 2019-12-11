@@ -53,6 +53,18 @@ export class UserControl extends React.Component {
     }
   }
 
+  logout() {
+    axios.delete("/login")
+    .then(
+      response => {
+        window.location.href = '/';
+      },
+      error => {
+        window.alert("You can never leave.");
+      }
+    )
+  }
+
   render() {
     if(this.props.username === null){
       //show login form
@@ -68,8 +80,13 @@ export class UserControl extends React.Component {
     else{
       //show currently logged in user and user setting dropdown
       return (
-        <div>
-          <h3 className="text-light">{this.props.username}</h3>
+        <div className="row justify-content-center">
+          <div className="col">
+            <h3 className="text-light">{this.props.username}</h3>
+          </div>
+          <div className="col">
+            <button className="btn btn-outline-danger mr-sm-2 button-logout" onClick={this.logout.bind(this)}>Log Out</button>
+          </div>
         </div>
       );
     }
