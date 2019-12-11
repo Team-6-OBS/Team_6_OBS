@@ -17,7 +17,7 @@ app.config['DB_NAME'] = "main_server"
 engine = db.create_engine('mysql+pymysql://' + app.config['DB_USER'] + ':' + app.config['DB_PASS'] + '@' + app.config['DB_HOST'] + '/' + app.config['DB_NAME'], pool_pre_ping=True)
 app.config['DB_CONN'] = engine.connect()
 
-######## BEGIN LOG FUNCTION #########
+######## BEGIN MISC FUNCTION #########
 
 def log_app_transaction(t_type, t_response, log_text, req_type):
 
@@ -27,7 +27,39 @@ def log_app_transaction(t_type, t_response, log_text, req_type):
 
     return(res)
 
-######## END LOG FUNCTION ########
+@app.route('/getlogs', methods=["GET"])
+def get_logs():
+
+    cookie = request.cookies.get('OBS_COOKIE')
+    if cookie == None:
+        log_app_transaction('OBS', 'No User Logged In', 'Logs Page', request.method)
+        return "No User Logged In", 404
+    else:
+        decoded_jwt = authenticate(cookie)
+        if decoded_jwt == 'Access token is missing or invalid':
+            log_app_transaction('OBS', 'Access token is missing or invalid', 'Logs Page', request.method)
+            return "No User Logged In", 404
+        elif decoded_jwt['username'] == 'admin':
+            sql = 'SELECT JSON_OBJECT(\'id\', id, \'type\', type, '
+            sql += '\'response\', response, \'log_date\', log_date, \'log\', log, \'request\', request) FROM logs;'
+            query_res = query_db(sql)
+
+            parsed_query_res = '{\'logs\': ['
+
+            for entry in query_res:
+                parsed_query_res = parsed_query_res + entry[0] + ', '
+            parsed_query_res = parsed_query_res[:len(parsed_query_res)-2]
+            parsed_query_res += ']}'
+            logs = json.loads(parsed_query_res.replace('\'', '\"'))
+            return logs
+
+        return 'Unauthorized User', 500
+
+
+
+    
+
+######## END MISC FUNCTION ########
 
 
 
