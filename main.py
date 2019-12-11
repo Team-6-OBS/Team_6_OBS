@@ -17,7 +17,7 @@ app.config['DB_NAME'] = "main_server"
 engine = db.create_engine('mysql+pymysql://' + app.config['DB_USER'] + ':' + app.config['DB_PASS'] + '@' + app.config['DB_HOST'] + '/' + app.config['DB_NAME'], pool_pre_ping=True)
 app.config['DB_CONN'] = engine.connect()
 
-######## BEGIN MISC FUNCTION #########
+######## BEGIN LOG FUNCTIONS #########
 
 def log_app_transaction(t_type, t_response, log_text, req_type):
 
@@ -52,15 +52,30 @@ def get_logs():
 
         return 'Unauthorized User', 500
 
-
-
-
-
-######## END MISC FUNCTION ########
+######## END LOG FUNCTIONS ########
 
 
 
 ######## BEGIN BUY/SELL HELPER FUNCTIONS ########
+
+@app.route('/getpnl', methods=["GET"])
+def get_pnl():
+    """this function gets the current OBS profits/losses table"""
+
+    sql = 'SELECT JSON_OBJECT(\'b_type\', b_type, \'username\', username, \'price\', price, '
+    sql += ' \'t_account\', t_account, \'stocktype\', stocktype, \'quantity\', quantity) '
+    sql += 'FROM buy_sell;'
+    query_res = query_db(sql)
+
+    parsed_query_res = '{\'transactions\': ['
+
+    for entry in query_res:
+        parsed_query_res = parsed_query_res + entry[0] + ', '
+    parsed_query_res = parsed_query_res[:len(parsed_query_res)-2]
+    parsed_query_res += ']}'
+    transactions = json.loads(parsed_query_res.replace('\'', '\"'))
+
+    return transactions
 
 def update_totals(amt, price, acc, t_type, sym, user):
 
@@ -253,7 +268,7 @@ def add_funds():
 def create_account():
     decoded_jwt = get_user(request)
 
-    if cookie == 'Access token is missing or invalid':
+    if decoded_jwt == 'Access token is missing or invalid':
         log_app_transaction('OBS', 'Access token is missing or invalid', 'Dashboard Creat Account Button', request.method)
         return "No User Logged In", 404
     else:
