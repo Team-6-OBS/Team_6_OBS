@@ -494,7 +494,7 @@ def login():
         #check whether all the data was passed in properly
         if username == None or password == None:
             log_app_transaction('AUTH', 'Failed Request', 'User Login Page', request.method)
-            return "Failed Request", 404
+            return "Failed Request", 500
 
         sql = 'SELECT * FROM accounts WHERE username=\'' + username + '\' AND password=\'' + password + '\''
         test = app.config['DB_CONN'].execute(sql).fetchall()
@@ -511,7 +511,7 @@ def login():
             return res, 200
         else:
             log_app_transaction('AUTH', 'Invalid User Credentials', 'User Login Page', request.method)
-            return "Invalid User Credentials", 400
+            return "Invalid User Credentials", 500
 
 @app.route('/dashboard')
 def dashboard():
