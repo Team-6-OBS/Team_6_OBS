@@ -20,7 +20,8 @@ jobs:
     - stage: linting
       script:
         - pylint -E main.py
-
-deploy:
-  provider: gae
-  project: obsmainservice
+    - stage: deploy
+      script: skip     # usually you do not want to rerun any tests
+      deploy: &gae
+        provider: gae
+        project: obsmainservice
