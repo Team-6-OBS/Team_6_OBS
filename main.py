@@ -17,7 +17,7 @@ app.config['DB_NAME'] = "main_server"
 engine = db.create_engine('mysql+pymysql://' + app.config['DB_USER'] + ':' + app.config['DB_PASS'] + '@' + app.config['DB_HOST'] + '/' + app.config['DB_NAME'], pool_pre_ping=True)
 app.config['DB_CONN'] = engine.connect()
 
-######## BEGIN LOG FUNCTION #########
+######## BEGIN LOG FUNCTIONS #########
 
 def log_app_transaction(t_type, t_response, log_text, req_type):
 
@@ -27,11 +27,55 @@ def log_app_transaction(t_type, t_response, log_text, req_type):
 
     return(res)
 
-######## END LOG FUNCTION ########
+@app.route('/getlogs', methods=["GET"])
+def get_logs():
+
+    user = get_user(request)
+
+    if user == 'Access token is missing or invalid':
+        log_app_transaction('OBS', 'Access token is missing or invalid', 'Logs Page', request.method)
+        return "No User Logged In", 404
+    else:
+        if user['username'] == 'admin':
+            sql = 'SELECT JSON_OBJECT(\'id\', id, \'type\', type, '
+            sql += '\'response\', response, \'log_date\', log_date, \'log\', log, \'request\', request) FROM logs;'
+            query_res = query_db(sql)
+
+            parsed_query_res = '{\'logs\': ['
+
+            for entry in query_res:
+                parsed_query_res = parsed_query_res + entry[0] + ', '
+            parsed_query_res = parsed_query_res[:len(parsed_query_res)-2]
+            parsed_query_res += ']}'
+            logs = json.loads(parsed_query_res.replace('\'', '\"'))
+            return logs
+
+        return 'Unauthorized User', 500
+
+######## END LOG FUNCTIONS ########
 
 
 
 ######## BEGIN BUY/SELL HELPER FUNCTIONS ########
+
+@app.route('/getpnl', methods=["GET"])
+def get_pnl():
+    """this function gets the current OBS profits/losses table"""
+
+    sql = 'SELECT JSON_OBJECT(\'b_type\', b_type, \'username\', username, \'price\', price, '
+    sql += ' \'t_account\', t_account, \'stocktype\', stocktype, \'quantity\', quantity) '
+    sql += 'FROM buy_sell;'
+    query_res = query_db(sql)
+
+    parsed_query_res = '{\'transactions\': ['
+
+    for entry in query_res:
+        parsed_query_res = parsed_query_res + entry[0] + ', '
+    parsed_query_res = parsed_query_res[:len(parsed_query_res)-2]
+    parsed_query_res += ']}'
+    transactions = json.loads(parsed_query_res.replace('\'', '\"'))
+
+    return transactions
 
 def update_totals(amt, price, acc, t_type, sym, user):
 
@@ -70,6 +114,26 @@ def authenticate(auth):
     except jwt.DecodeError:
         output = 'Access token is missing or invalid'
     return output
+
+def get_user(request):
+    """Checks both the cookies and the headers in the request to see if we can get the user"""
+
+    #token can either be in the cookies or the header to facilitate either browser or api use of the app
+    cookie = request.cookies.get('OBS_COOKIE')
+    token = request.headers.get('auth')
+    user = "";
+
+    #check the cookie first
+    if cookie != None:
+        user = authenticate(cookie)
+        if user != 'Access token is missing or invalid':
+            return user
+    elif token != None:
+        user = authenticate(token)
+        if user != 'Access token is missing or invalid':
+            return user
+    else:
+        return 'Access token is missing or invalid'
 
 def save_to_db(b_type, name, acc, price, amt, stock_inventory, user_inventory, sym):
     """This function takes buy_sell object and saves it to the db"""
@@ -175,16 +239,12 @@ def query_db(sql):
 ######## BEGIN DASHBOARD FUNCTIONS ########
 @app.route('/add', methods=["POST"])
 def add_funds():
-    cookie = request.cookies.get('OBS_COOKIE')
-    if cookie == None:
-        log_app_transaction('OBS', 'No User Logged In', 'Dashboard Add Funds Button', request.method)
+    decoded_jwt = get_user(request)
+
+    if decoded_jwt == 'Access token is missing or invalid':
+        log_app_transaction('OBS', 'Access token is missing or invalid', 'Dashboard Add Funds Button', request.method)
         return "No User Logged In", 404
     else:
-        decoded_jwt = authenticate(cookie)
-        if decoded_jwt == 'Access token is missing or invalid':
-            log_app_transaction('OBS', 'Access token is missing or invalid', 'Dashboard Add Funds Button', request.method)
-            return "No User Logged In", 404
-
         money_added = request.form.get('money')
         if float(money_added) > 0:
             acc = request.form.get('account')
@@ -206,16 +266,12 @@ def add_funds():
 
 @app.route('/newacc', methods=["POST"])
 def create_account():
-    cookie = request.cookies.get('OBS_COOKIE')
-    if cookie == None:
-        log_app_transaction('OBS', 'No User Logged In', 'Dashboard Creat Account Button', request.method)
+    decoded_jwt = get_user(request)
+
+    if decoded_jwt == 'Access token is missing or invalid':
+        log_app_transaction('OBS', 'Access token is missing or invalid', 'Dashboard Creat Account Button', request.method)
         return "No User Logged In", 404
     else:
-        decoded_jwt = authenticate(cookie)
-        if decoded_jwt == 'Access token is missing or invalid':
-            log_app_transaction('OBS', 'Access token is missing or invalid', 'Dashboard Create Account Button', request.method)
-            return "No User Logged In", 404
-
         acc_name = request.form.get('account')
 
         sql = 'SELECT account from account_totals WHERE username = \'' + decoded_jwt['username'] + '\';'
@@ -257,15 +313,11 @@ def quotes():
 
 @app.route('/totals')
 def total():
-    #try to get the logged in user
-    cookie = request.cookies.get('OBS_COOKIE')
-    if cookie == None:
+    decoded_jwt = get_user(request)
+
+    if decoded_jwt == 'Access token is missing or invalid':
         return "No User Logged In", 404
     else:
-        decoded_jwt = authenticate(cookie)
-        if decoded_jwt == 'Access token is missing or invalid':
-            return "No User Logged In", 404
-
         #user is logeed in so try and get their dashboard
         sql = 'SELECT * from account_totals where username = \'' + decoded_jwt['username'] + '\''
         try:
@@ -303,18 +355,10 @@ def buy():
     account = request.form.get('account')
     stock_symbol = request.form.get('symbol')
 
-    cookie = request.cookies.get('OBS_COOKIE')
-    user_data = None
-    if cookie == None:
-
-        log_app_transaction('AUTH', 'No User Logged In', 'Dashboard Buy Button', request.method)
+    user_data = get_user(request)
+    if user_data == 'Access token is missing or invalid':
+        log_app_transaction('AUTH', 'Access token is missing or invalid', 'Dashboard Buy Button', request.method)
         return "No User Logged In", 404
-    else:
-        user_data = authenticate(cookie)
-        if user_data == 'Access token is missing or invalid':
-
-            log_app_transaction('AUTH', 'Access token is missing or invalid', 'Dashboard Buy Button', request.method)
-            return "No User Logged In", 404
 
     price = get_delayed_price(stock_symbol)
 
@@ -324,7 +368,7 @@ def buy():
         sql = 'SELECT ' + stock_col + ' FROM account_totals WHERE account = \'Bank Stock Inventory\' AND username = \'admin\''
         bank_stocks = query_db(sql)[0][0]
 
-        sql = 'SELECT ' + stock_col + ' FROM account_totals WHERE account = \'' + account + '\''
+        sql = 'SELECT ' + stock_col + ' FROM account_totals WHERE account = \'' + account + '\' AND username = \'' + user_data['username'] + '\''
         user_stocks = query_db(sql)[0][0]
 
         check = save_to_db('BUY', user_data['username'], account,
@@ -346,25 +390,17 @@ def sell():
     account = request.form.get('account')
     stock_symbol = request.form.get('symbol')
 
-    cookie = request.cookies.get('OBS_COOKIE')
-    user_data = None
-    if cookie == None:
-
-        log_app_transaction('STOCK', 'No User Logged In', 'Dashboard Sell Button', request.method)
+    user_data = get_user(request)
+    if user_data == 'Access token is missing or invalid':
+        log_app_transaction('AUTH', 'Access token is missing or invalid', 'Dashboard Buy Button', request.method)
         return "No User Logged In", 404
-    else:
-        user_data = authenticate(cookie)
-        if user_data == 'Access token is missing or invalid':
-
-            log_app_transaction('STOCK', 'Access token is missing or invalid', 'Dashboard Sell Button', request.method)
-            return "No User Logged In", 404
 
     price = get_delayed_price(stock_symbol)
 
     if isinstance(user_data, dict):
         stock_col = stock_symbol.lower() + '_stock'
 
-        sql = 'SELECT ' + stock_col + ' FROM account_totals WHERE account = \'' + account + '\''
+        sql = 'SELECT ' + stock_col + ' FROM account_totals WHERE account = \'' + account + '\' AND username = \'' + user_data['username'] + '\''
         user_stocks = query_db(sql)[0][0]
 
         check = save_to_db('SELL', user_data['username'], account, price,
@@ -388,6 +424,14 @@ def sell():
 @app.route('/')
 def home():
     return render_template("obs_navigation.html")
+
+@app.route('/logs')
+def logs_view():
+    return render_template("logs.html")
+
+@app.route('/pnl')
+def pnl_view():
+    return render_template("pnl.html")
 
 @app.route('/signup', methods=["GET", "POST"])
 def signup():
@@ -426,21 +470,22 @@ def signup():
             log_app_transaction('AUTH', 'Email address or username already in use', 'User Sign Up Page', request.method)
             return "Email address or username already in use", 400
 
-@app.route('/login', methods=["GET", "POST"])
+@app.route('/login', methods=["GET", "POST", "DELETE"])
 def login():
+    if request.method == "DELETE":
+        #clear the cookie that saves user logged in
+        res = make_response()
+        res.set_cookie("OBS_COOKIE", value="", httponly=True, expires=0)
+        return res, 200
+
     if request.method == "GET":
-        cookie = request.cookies.get('OBS_COOKIE')
-        if cookie == None:
-            log_app_transaction('AUTH', 'No User Logged In', 'User Login Page', request.method)
+        decoded_jwt = get_user(request)
+
+        if decoded_jwt == 'Access token is missing or invalid':
+            log_app_transaction('AUTH', 'Access token is missing or invalid', 'User Login Page', request.method)
             return "No User Logged In", 404
         else:
-            decoded_jwt = authenticate(cookie)
-            if decoded_jwt == 'Access token is missing or invalid':
-                log_app_transaction('AUTH', 'No User Logged In', 'User Login Page', request.method)
-                return "No User Logged In", 404
-            else:
-                log_app_transaction('AUTH', 'Account Logged In Successfully', 'User Login Page', request.method)
-                return decoded_jwt, 200
+            return decoded_jwt, 200
 
     if request.method == "POST":
         username = request.form.get("username")
