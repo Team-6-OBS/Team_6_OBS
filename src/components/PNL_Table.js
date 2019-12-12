@@ -66,6 +66,8 @@ export class PNL_Table extends React.Component {
             }
             else if(this.transactions[i].stocktype=== "DIS"){
                 this.dis.buy+=this.transactions[i].quantity;
+                console.log(this.transactions[i].quantity+" admin buy:"+(this.transactions[i].quantity*this.transactions[i].price)+"\n");
+              
                 this.dis.totalMoney+=(this.transactions[i].quantity*this.transactions[i].price);
             }
             else if(this.transactions[i].stocktype==="SGAMY"){
@@ -87,30 +89,32 @@ export class PNL_Table extends React.Component {
             if(this.transactions[i].stocktype==="NTDOY"){
               this.ntdoy.buy-=this.transactions[i].quantity;
               this.ntdoy.sell-=this.transactions[i].quantity;
-              this.ntdoy.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
+             // this.ntdoy.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
             }
             else if(this.transactions[i].stocktype=== "DIS"){
                 this.dis.buy-=this.transactions[i].quantity;
                   this.dis.sell-=this.transactions[i].quantity;
-                this.dis.totalMoney+=(this.transactions[i].quantity*this.transactions[i].price);
+                  console.log(this.transactions[i].quantity+" sell:"+(this.transactions[i].quantity*this.transactions[i].price)+"\n");
+                //this.dis.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
+                
             }
             else if(this.transactions[i].stocktype==="SGAMY"){
                 this.sgamy.buy-=this.transactions[i].quantity;
                   this.sgamy.sell-=this.transactions[i].quantity;
-                this.sgamy.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
+                //this.sgamy.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
             }
             else if(this.transactions[i].stocktype==="UBSFY"){
                 this.ubsfy.buy-=this.transactions[i].quantity;
                 this.ubsfy.sell-=this.transactions[i].quantity;
-                this.ubsfy.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
+               // this.ubsfy.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
             }
             else if(this.transactions[i].stocktype==="ATVI"){
                 this.atvi.buy-=this.transactions[i].quantity;
                 this.atvi.sell-=this.transactions[i].quantity;
-                this.atvi.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
+                //this.atvi.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
             }
           }
-         if(this.transactions[i].b_type==="BUY"){
+          else if(this.transactions[i].b_type==="BUY"){
 
             if(this.transactions[i].stocktype==="NTDOY"){
               this.ntdoy.sell+=this.transactions[i].quantity;
@@ -119,7 +123,8 @@ export class PNL_Table extends React.Component {
             }
             else if(this.transactions[i].stocktype=== "DIS"){
                 this.dis.sell+=this.transactions[i].quantity;
-
+                console.log(this.transactions[i].quantity+" buy:"+(this.transactions[i].quantity*this.transactions[i].price)+"\n");
+              
                 this.dis.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
             }
             else if(this.transactions[i].stocktype==="SGAMY"){
@@ -143,6 +148,9 @@ export class PNL_Table extends React.Component {
       this.ubsfy.buy-=this.ubsfy.sell;
       this.ntdoy.buy-=this.ntdoy.sell;
       this.sgamy.buy-=this.sgamy.sell;
+      this.dis.totalMoney.toFixed(2);
+      this.ubsfy.totalMoney.toFixed(2);
+      
     }
 
   render () {
