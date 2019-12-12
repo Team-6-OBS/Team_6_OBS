@@ -19,7 +19,7 @@ export class PNL_Table extends React.Component {
     this.ubsfy = null;
     this.atvi = null;
   }
- 
+
   //get all the logs
   componentDidMount(){
     axios.get('/getpnl').then(
@@ -47,9 +47,8 @@ export class PNL_Table extends React.Component {
       }
     )
   }
-  
+
   getPNL(){
-    console.log(this.transactions);
     this.dis={buy:0 ,sell:0,totalMoney:0}
     this.ntdoy={buy:0 ,sell:0,totalMoney:0}
     this.sgamy={buy:0,sell:0,totalMoney:0}
@@ -57,14 +56,13 @@ export class PNL_Table extends React.Component {
     this.atvi={buy:0 ,sell:0,totalMoney:0}
     for(var i=0;i<this.transactions.length;i++)
     {
-      
+
       if(this.transactions[i].username==="admin"){
-        
+
         if(this.transactions[i].b_type==="BUY"){
             if(this.transactions[i].stocktype==="NTDOY"){
               this.ntdoy.buy+=this.transactions[i].quantity;
               this.ntdoy.totalMoney+=(this.transactions[i].quantity*this.transactions[i].price);
-              console.log(this.ntdoy.buy+"\n");
             }
             else if(this.transactions[i].stocktype=== "DIS"){
                 this.dis.buy+=this.transactions[i].quantity;
@@ -84,26 +82,31 @@ export class PNL_Table extends React.Component {
             }
           }
       }
-      else{  
+      else{
         if(this.transactions[i].b_type==="SELL"){
             if(this.transactions[i].stocktype==="NTDOY"){
               this.ntdoy.buy-=this.transactions[i].quantity;
+              this.ntdoy.sell-=this.transactions[i].quantity;
               this.ntdoy.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
             }
             else if(this.transactions[i].stocktype=== "DIS"){
                 this.dis.buy-=this.transactions[i].quantity;
+                  this.dis.sell-=this.transactions[i].quantity;
                 this.dis.totalMoney+=(this.transactions[i].quantity*this.transactions[i].price);
             }
             else if(this.transactions[i].stocktype==="SGAMY"){
                 this.sgamy.buy-=this.transactions[i].quantity;
+                  this.sgamy.sell-=this.transactions[i].quantity;
                 this.sgamy.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
             }
             else if(this.transactions[i].stocktype==="UBSFY"){
                 this.ubsfy.buy-=this.transactions[i].quantity;
+                this.ubsfy.sell-=this.transactions[i].quantity;
                 this.ubsfy.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
             }
             else if(this.transactions[i].stocktype==="ATVI"){
                 this.atvi.buy-=this.transactions[i].quantity;
+                this.atvi.sell-=this.transactions[i].quantity;
                 this.atvi.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
             }
           }
@@ -111,14 +114,17 @@ export class PNL_Table extends React.Component {
 
             if(this.transactions[i].stocktype==="NTDOY"){
               this.ntdoy.sell+=this.transactions[i].quantity;
+
               this.ntdoy.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
             }
             else if(this.transactions[i].stocktype=== "DIS"){
                 this.dis.sell+=this.transactions[i].quantity;
+
                 this.dis.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
             }
             else if(this.transactions[i].stocktype==="SGAMY"){
                 this.sgamy.sell+=this.transactions[i].quantity;
+
                 this.sgamy.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
             }
             else if(this.transactions[i].stocktype==="UBSFY"){
@@ -132,8 +138,11 @@ export class PNL_Table extends React.Component {
           }
         }
       }
-      console.log(this.dis.totalMoney+" sell:" + this.dis.sell+" buy:" +this.dis.buy);
-
+      this.atvi.buy-=this.atvi.sell;
+      this.dis.buy-=this.dis.sell;
+      this.ubsfy.buy-=this.ubsfy.sell;
+      this.ntdoy.buy-=this.ntdoy.sell;
+      this.sgamy.buy-=this.sgamy.sell;
     }
 
   render () {
@@ -160,38 +169,38 @@ export class PNL_Table extends React.Component {
                 <tbody>
                   <tr>
                     <td>NTDOY</td>
-                    <td></td>
-                    <td></td>
+                    <td>{this.ntdoy.buy}</td>
+                    <td>{this.ntdoy.sell}</td>
                     <td>{this.prices.quote[0].last}</td>
-                    <td></td>
+                    <td>{((this.ntdoy.totalMoney - (this.prices.quote[0].last*this.ntdoy.buy))*-1).toFixed(2)}</td>
                   </tr>
                   <tr>
                     <td>DIS</td>
-                    <td></td>
-                    <td></td>
+                    <td>{this.dis.buy}</td>
+                    <td>{this.dis.sell}</td>
                     <td>{this.prices.quote[1].last}</td>
-                    <td></td>
+                    <td>{((this.dis.totalMoney - (this.prices.quote[1].last*this.dis.buy))*-1).toFixed(2)}</td>
                   </tr>
                   <tr>
                     <td>ATVI</td>
-                    <td></td>
-                    <td></td>
+                    <td>{this.atvi.buy}</td>
+                    <td>{this.atvi.sell}</td>
                     <td>{this.prices.quote[2].last}</td>
-                    <td></td>
+                    <td>{((this.atvi.totalMoney - (this.prices.quote[2].last*this.atvi.buy))*-1).toFixed(2)}</td>
                   </tr>
                   <tr>
                     <td>SGAMY</td>
-                    <td></td>
-                    <td></td>
+                    <td>{this.sgamy.buy}</td>
+                    <td>{this.sgamy.sell}</td>
                     <td>{this.prices.quote[3].last}</td>
-                    <td></td>
+                    <td>{((this.sgamy.totalMoney - (this.prices.quote[3].last*this.sgamy.buy))*-1).toFixed(2)}</td>
                   </tr>
                   <tr>
                     <td>UBSFY</td>
-                    <td></td>
-                    <td></td>
+                    <td>{this.ubsfy.buy}</td>
+                    <td>{this.ubsfy.sell}</td>
                     <td>{this.prices.quote[4].last}</td>
-                    <td></td>
+                    <td>{((this.ubsfy.totalMoney - (this.prices.quote[4].last*this.ubsfy.buy))*-1).toFixed(2)}</td>
                   </tr>
                 </tbody>
               </table>
