@@ -2,11 +2,10 @@ language: python
 python:
   - "3.7"
 
-#addons:
-#  sonarcloud:
-#    organization: "team-6-obs"
-#    token:
-#      secure: SONAR_TOKEN
+deploy:
+  provider: gae
+  keyfile: gcloud-key
+  project: obsmainservice
 
 jobs:
   include:
@@ -17,38 +16,12 @@ jobs:
         - npm install
         - npm run build
     - stage: test
-      script: pytest micro/adam
-    -
-      script: pytest micro/michael
-    -
-      script: pytest micro/sean
-    -
-      script: pytest micro/ben
-    -
-      script: pytest micro/carlos
     -
       script: pytest main_test.py
     -
       script:
         - npm i
-        - ./node_modules/.bin/cypress run "cypress/integration/always_pass.js"
+        - ./node_modules/.bin/cypress run
     - stage: linting
       script:
-        - pylint -E micro/adam/main.py
-        - pylint -E micro/michael/main.py
-        - pylint -E micro/sean/main.py
-        - pylint -E micro/ben/main.py
-        - pylint -E micro/carlos/main.py
         - pylint -E main.py
-#    - stage: static analysis
-#      script: sonar-scanner
-
-
-
-#before_install:
-#  - nvm install node
-#  - pyenv install 3.7.0a1
-
-#install:
-#  - npm install
-#  - pip install -r requirements.txt

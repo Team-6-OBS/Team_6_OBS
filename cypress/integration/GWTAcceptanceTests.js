@@ -1,7 +1,10 @@
 let newUser = makeid(12)
-let newEmail = makeid(5) + '@gmail.com' 
+let newEmail = makeid(5) + '@gmail.com'
 
-describe('View Tests without credentials', function () {//3. Non-authed users cannot view a dashboard or engage stock transactions 
+
+//ALL TESTS HERE ARE END-END TESTS
+
+describe('View Tests without credentials', function () {//3. Non-authed users cannot view a dashboard or engage stock transactions
     it('Goes to the main web address without authenitcation and is unable to got to /dashboard', function () {
         cy.visit('http://localhost:5000/')
 
@@ -98,7 +101,7 @@ describe('Signup Tests with Login Assertion', function () {//1. New clients can 
       })
     })
 })
-describe('Login Authentication Test', function () {//5. Clients must input valid username/password combination or given an error message when logging in 
+describe('Login Authentication Test', function () {//5. Clients must input valid username/password combination or given an error message when logging in
     it('Logs in with bad credentials and gets a message', function () {
         cy.visit('http://localhost:5000')
 
@@ -112,7 +115,7 @@ describe('Login Authentication Test', function () {//5. Clients must input valid
         cy.on('window:alert', (str) => {
             expect(str).to.equal('Invalid Username/Password Combo')
         })
-        cy.wait(7000)
+        cy.wait(3000)
     })
     it('Logs in with valid credentials from /dashboard and page reflects appropriate elements to an authed user', function () {
         cy.visit('http://localhost:5000')
@@ -124,9 +127,9 @@ describe('Login Authentication Test', function () {//5. Clients must input valid
         cy.get('body').children().eq(0).children().eq(0).children().eq(0).children().eq(1).children().eq(2).click()
         //cy.get('.btn btn-outline-success mr-sm-2 button-login')
 
-        cy.wait(7000)
+        cy.wait(3000)
         cy.visit('http://localhost:5000/dashboard')
-        cy.wait(7000)
+        cy.wait(3000)
 
         cy.get('.nav-link').eq(1).contains('Dashboard')
 
@@ -135,13 +138,13 @@ describe('Login Authentication Test', function () {//5. Clients must input valid
         cy.get('.container-fluid')
 
         cy.get('button').contains('Create New Table').parent().children()
-        
-        
+
+
         //cy.get('.container-fluid').children().eq(0).children.eq(0).children()
         //cy.get('.btn btn-primary')
     })
 })
-describe('Dashboard view Test', function () {//2. Authed users can view their OBS dashboard 
+describe('Dashboard view Test', function () {//2. Authed users can view their OBS dashboard
     it('Logged in user with valid credentials views user dashboard', function () {
         cy.visit('http://localhost:5000/')
 
@@ -151,9 +154,9 @@ describe('Dashboard view Test', function () {//2. Authed users can view their OB
         //cy.get('mr-sm-2 pass-login')
         cy.get('body').children().eq(0).children().eq(0).children().eq(0).children().eq(1).children().eq(2).click()
 
-        cy.wait(7000)
+        cy.wait(3000)
         cy.visit('http://localhost:5000/dashboard')
-        cy.wait(7000)
+        cy.wait(3000)
 
         cy.get('.nav-link').eq(1).contains('Dashboard')
 
@@ -164,12 +167,12 @@ describe('Dashboard view Test', function () {//2. Authed users can view their OB
         cy.get('button').contains('Create New Table')
 
         //cy.get('.btn btn-primary')
-  
+
     })
 })
-describe('User Account Creation Test', function () {//7. Authed user can create multiple accounts 
+describe('User Account Creation Test', function () {//7. Authed user can create multiple accounts
     it('Clicks first create account button (1 out of 3) and is now able to see a table for Account1', function () {
-        
+
         cy.visit('http://localhost:5000/')
         cy.get('body').children().eq(0).children().eq(0).children().eq(0).children().eq(1).children().eq(0).type(newUser).should('have.value', newUser)
         //cy.get('.mr-sm-2 username-login')
@@ -178,21 +181,21 @@ describe('User Account Creation Test', function () {//7. Authed user can create 
         cy.get('body').children().eq(0).children().eq(0).children().eq(0).children().eq(1).children().eq(2).click()
         //cy.get('.btn btn-outline-success mr-sm-2 button-login')
 
-        cy.wait(7000)
+        cy.wait(3000)
         cy.visit('http://localhost:5000/dashboard')
-        cy.wait(7000)
+        cy.wait(3000)
 
-        cy.get('.container-fluid').children().eq(0).children().eq(0).children().eq(0).should('have.text', 'Create New Table') //Button1 
+        cy.get('.container-fluid').children().eq(0).children().eq(0).children().eq(0).should('have.text', 'Create New Table') //Button1
         cy.get('.container-fluid').children().eq(1).children().eq(0).children().eq(0).should('have.text', 'Create New Table') //Button2
         cy.get('.container-fluid').children().eq(2).children().eq(0).children().eq(0).should('have.text', 'Create New Table') //Button2
 
         cy.window().then(win => {
             cy.stub(win, 'prompt').returns('Account1')
-            cy.get('.container-fluid').children().eq(0).children().eq(0).children().eq(0).click() //Button1 
+            cy.get('.container-fluid').children().eq(0).children().eq(0).children().eq(0).click() //Button1
             //cy.get('.btn btn-primary')
-            //... Saved value assert 
+            //... Saved value assert
         })
-        cy.wait(7000)
+        cy.wait(3000)
         cy.get('button').contains('Create New Table').click();
         cy.get('thead').find('tr').eq(0).children().contains('Account1')
         cy.get('.ntdoy')
@@ -202,7 +205,7 @@ describe('User Account Creation Test', function () {//7. Authed user can create 
         cy.get('.ubsfy')
     })
 })
-describe('Dashboard table view tests', function () {//4. OBS dashboard displays current stock prices for Bank Inc stocks with client portfolio information 
+describe('Dashboard table view tests', function () {//4. OBS dashboard displays current stock prices for Bank Inc stocks with client portfolio information
     it('Has table a table with stock and client information', function () {
 
       cy.visit('http://localhost:5000/')
@@ -213,9 +216,9 @@ describe('Dashboard table view tests', function () {//4. OBS dashboard displays 
       cy.get('body').children().eq(0).children().eq(0).children().eq(0).children().eq(1).children().eq(2).click()
       //cy.get('.btn btn-outline-success mr-sm-2 button-login')
 
-      cy.wait(7000)
+      cy.wait(3000)
       cy.visit('http://localhost:5000/dashboard')
-      cy.wait(7000)
+      cy.wait(3000)
 
       cy.get('thead').find('tr').children().contains('Account1') //cy.get('.table table-striped').contains('Account1')
       cy.get('thead').find('tr').children().contains('0')
@@ -247,7 +250,7 @@ describe('Dashboard table view tests', function () {//4. OBS dashboard displays 
 
     })
 })
-describe('Add Funds functional test', function () {//8. Authed user can add funds to an account 
+describe('Add Funds functional test', function () {//8. Authed user can add funds to an account
     it('adds funds to a specified account', function () {
         cy.visit('http://localhost:5000/')
         cy.get('body').children().eq(0).children().eq(0).children().eq(0).children().eq(1).children().eq(0).type(newUser).should('have.value', newUser)
@@ -257,16 +260,16 @@ describe('Add Funds functional test', function () {//8. Authed user can add fund
         cy.get('body').children().eq(0).children().eq(0).children().eq(0).children().eq(1).children().eq(2).click()
         //cy.get('.btn btn-outline-success mr-sm-2 button-login')
 
-        cy.wait(7000)
+        cy.wait(3000)
         cy.visit('http://localhost:5000/dashboard')
-        cy.wait(7000)
+        cy.wait(3000)
 
         cy.window().then(win => {
             cy.stub(win, 'prompt').returns('2')
-            cy.get('.container-fluid').children().eq(0).contains('Add').click()//cy.get('.container-fluid').children().eq(0).children().eq(0).children().eq(0).children().eq(0).children().eq(0).children().eq(2).children().eq(0).click(); //Button1 
+            cy.get('.container-fluid').children().eq(0).contains('Add').click()//cy.get('.container-fluid').children().eq(0).children().eq(0).children().eq(0).children().eq(0).children().eq(0).children().eq(2).children().eq(0).click(); //Button1
             //... Saved value assert
         })
-        cy.wait(7000)
+        cy.wait(3000)
         cy.get('thead').find('tr').children().contains('2')
     })
     it('does not put through a negative value/invalid input', function () {
@@ -276,11 +279,11 @@ describe('Add Funds functional test', function () {//8. Authed user can add fund
             cy.get('.container-fluid').children().eq(0).contains('Add').click()
             //... Saved value assert
         })
-        
+
         cy.get('thead').find('tr').children().contains('2')
     })
 })
-describe('Share purchase functional correctness test', function () {//6. Authed user cannot purchase shares at a cost greater than the cash held in the account 
+describe('Share purchase functional correctness test', function () {//6. Authed user cannot purchase shares at a cost greater than the cash held in the account
     it('Attempts to buy while having almost no money and fails', function () {
         cy.visit('http://localhost:5000/')
         cy.get('body').children().eq(0).children().eq(0).children().eq(0).children().eq(1).children().eq(0).type(newUser).should('have.value', newUser)
@@ -290,9 +293,9 @@ describe('Share purchase functional correctness test', function () {//6. Authed 
         cy.get('body').children().eq(0).children().eq(0).children().eq(0).children().eq(1).children().eq(2).click()
         //cy.get('.btn btn-outline-success mr-sm-2 button-login')
 
-        cy.wait(7000)
+        cy.wait(3000)
         cy.visit('http://localhost:5000/dashboard')
-        cy.wait(7000)
+        cy.wait(3000)
 
         cy.window().then(win => {
             cy.stub(win, 'prompt').returns('100')
@@ -305,7 +308,7 @@ describe('Share purchase functional correctness test', function () {//6. Authed 
     })
 })
 describe('Stock Buy/Sell functional tests', function () {//10. Authed users can purchase shares and sell existing shares
-    it('Buys and Sells stock successfully and is reflected in the table ', function () {
+    it('Adds more funds to the Table', function () {
         cy.visit('http://localhost:5000')
 
         cy.get('body').children().eq(0).children().eq(0).children().eq(0).children().eq(1).children().eq(0).type(newUser).should('have.value', newUser)
@@ -315,78 +318,84 @@ describe('Stock Buy/Sell functional tests', function () {//10. Authed users can 
         cy.get('body').children().eq(0).children().eq(0).children().eq(0).children().eq(1).children().eq(2).click()
         //cy.get('.btn btn-outline-success mr-sm-2 button-login')
 
-        cy.wait(7000)
+        cy.wait(3000)
         cy.visit('http://localhost:5000/dashboard')
-        cy.wait(7000)
+        cy.wait(3000)
 
         cy.window().then(win => {
-            cy.stub(win, 'prompt').returns('4998')
+            cy.stub(win, 'prompt').returns('9998')
             cy.get('.container-fluid').children().eq(0).contains('Add').click()
-            cy.wait(7000)
-            cy.stub(win, 'prompt').returns('2')
-            cy.get('.container-fluid').contains('.ntdoy').contains('Buy').click(); 
-            cy.wait(7000)
-            cy.stub(win, 'prompt').returns('1')
-            cy.get('.container-fluid').contains('.ntdoy').contains('Sell').click();
-            //... Saved value assert
         })
-       cy.wait(7000)
-        cy.get('.ntdoy').children().eq(1).should('have.text', '2')
-        cy.get('.ntdoy').children().eq(1).should('have.text', '1')
-        /*cy.window().then(win => {
-            cy.stub(win, 'prompt').returns('2')
-            cy.get('.container-fluid').contains('.ntdoy').contains('Buy').click();     
-            //... Saved value assert
-        })
-        
-        
-       
+        cy.wait(3000)
+        cy.get('thead').find('tr').children().contains('10000')
+    })
+    it('Buys stocks and reflects that change in the table', function(){
+      cy.visit('http://localhost:5000')
+
+      cy.get('body').children().eq(0).children().eq(0).children().eq(0).children().eq(1).children().eq(0).type(newUser).should('have.value', newUser)
+      //cy.get('.mr-sm-2 username-login')
+      cy.get('body').children().eq(0).children().eq(0).children().eq(0).children().eq(1).children().eq(1).type('long_password').should('have.value', 'long_password')
+      //cy.get('mr-sm-2 pass-login')
+      cy.get('body').children().eq(0).children().eq(0).children().eq(0).children().eq(1).children().eq(2).click()
+      //cy.get('.btn btn-outline-success mr-sm-2 button-login')
+
+      cy.wait(3000)
+      cy.visit('http://localhost:5000/dashboard')
+      cy.wait(3000)
 
         cy.window().then(win => {
+          cy.stub(win, 'prompt').returns('2')
+          cy.get('button.btn.btn-primary.ntdoy.buy').click();
+        })
+        cy.wait(3000)
+        cy.get('.ntdoy').children().eq(1).should('have.text', '2')
+    })
+    it('Sells stocks and reflects that change in the table', function(){
+      cy.visit('http://localhost:5000')
 
-            //... Saved value assert
-        })*/
- 
- 
+      cy.get('body').children().eq(0).children().eq(0).children().eq(0).children().eq(1).children().eq(0).type(newUser).should('have.value', newUser)
+      //cy.get('.mr-sm-2 username-login')
+      cy.get('body').children().eq(0).children().eq(0).children().eq(0).children().eq(1).children().eq(1).type('long_password').should('have.value', 'long_password')
+      //cy.get('mr-sm-2 pass-login')
+      cy.get('body').children().eq(0).children().eq(0).children().eq(0).children().eq(1).children().eq(2).click()
+      //cy.get('.btn btn-outline-success mr-sm-2 button-login')
+
+      cy.wait(3000)
+      cy.visit('http://localhost:5000/dashboard')
+      cy.wait(3000)
+
+        cy.window().then(win => {
+          cy.stub(win, 'prompt').returns('1')
+          cy.get('button.btn.btn-primary.ntdoy.sell').click();
+        })
+        cy.wait(3000)
+        cy.get('.ntdoy').children().eq(1).should('have.text', '1')
     })
     it('Invalid input does not get put through', function () {
-        cy.visit('http://localhost:5000/dashboard')
-        cy.wait(7000)
+      cy.visit('http://localhost:5000')
+
+      cy.get('body').children().eq(0).children().eq(0).children().eq(0).children().eq(1).children().eq(0).type(newUser).should('have.value', newUser)
+      //cy.get('.mr-sm-2 username-login')
+      cy.get('body').children().eq(0).children().eq(0).children().eq(0).children().eq(1).children().eq(1).type('long_password').should('have.value', 'long_password')
+      //cy.get('mr-sm-2 pass-login')
+      cy.get('body').children().eq(0).children().eq(0).children().eq(0).children().eq(1).children().eq(2).click()
+      //cy.get('.btn btn-outline-success mr-sm-2 button-login')
+
+      cy.wait(3000)
+      cy.visit('http://localhost:5000/dashboard')
+      cy.wait(3000)
 
         cy.window().then(win => {
             cy.stub(win, 'prompt').returns('-1')
-            cy.get('.container-fluid').contains('.ntdoy').contains('Buy').click();
+            cy.get('button.btn.btn-primary.ntdoy.buy').click();
             //... Saved value assert
         })
-        cy.wait(7000)
+        cy.wait(3000)
         cy.get('.ntdoy').children().eq(1).should('have.text', '1')
     })
 })
 
-/*describe('View test over multiple account tables', function () {//9. OBS maintains separate cash and stock holdings purchased per account  
-    it('Between the two tables of accounts different funds and stock amounts are found', function () {
-        cy.window().then(win => {
-            cy.stub(win, 'prompt').returns('Account2')
-            cy.get('.btn btn-primary').eq(1).click();
-            //... Saved value assert
-        })
-        cy.get('thead').eq(1).find('tr').eq(0).children().contains('Account2')
-        cy.get('thead').eq(1).find('tr').eq(0).children().eq(1).should('have.text', '0')
-        cy.get('thead').eq(0).find('tr').eq(0).children().contains('Account1')
-        cy.get('thead').eq(0).find('tr').eq(0).children().eq(1).should('not.have.text', '0')
-    })
-})
-describe('Number of Accounts possible tests', function () {//11. Authed users are not permitted to open more that 3 accounts 
-    it('In creating three tables/accounts a button to create another should not exist', function () {
-        cy.window().then(win => {
-            cy.stub(win, 'prompt').returns('Account3')
-            cy.get('.btn btn-primary').eq(3).click();
-            //... Saved value assert
-        })
-        cy.get('thead').should('have.length', 3)
-        cy.get('.btn btn-primary').contains('Create New Table').should('not.exist')
-    })
-})*/
+//helper function to create randomized usernames and emails so tests can run the same way every time
 function makeid(length) {
     var result = '';
     var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'; //0123456789
