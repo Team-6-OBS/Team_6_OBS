@@ -2,7 +2,7 @@ let newUser = makeid(12)
 let newEmail = makeid(5) + '@gmail.com'
 
 
-//ALL TESTS HERE ARE END-END TESTS
+/*---------------    ALL TESTS HERE ARE: Acceptance tests --------------------------*/
 
 describe('View Tests without credentials', function () {//3. Non-authed users cannot view a dashboard or engage stock transactions
     it('Goes to the main web address without authenitcation and is unable to got to /dashboard', function () {
