@@ -422,12 +422,16 @@ def sell():
 
 ######## BEGIN USER ROUTES ########
 @app.route('/')
-def logs_view():
+def home():
     return render_template("obs_navigation.html")
 
 @app.route('/logs')
-def home():
+def logs_view():
     return render_template("logs.html")
+
+@app.route('/pnl')
+def pnl_view():
+    return render_template("pnl.html")
 
 @app.route('/signup', methods=["GET", "POST"])
 def signup():
