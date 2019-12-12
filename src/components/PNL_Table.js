@@ -19,12 +19,12 @@ export class PNL_Table extends React.Component {
     this.ubsfy = null;
     this.atvi = null;
   }
-
+ 
   //get all the logs
   componentDidMount(){
     axios.get('/getpnl').then(
       response => {
-        this.transactions = response.data;
+        this.transactions = response.data.transactions;
         this.getPNL();
         this.setState({
           transactions: true
@@ -47,10 +47,94 @@ export class PNL_Table extends React.Component {
       }
     )
   }
-
+  
   getPNL(){
     console.log(this.transactions);
-  }
+    this.dis={buy:0 ,sell:0,totalMoney:0}
+    this.ntdoy={buy:0 ,sell:0,totalMoney:0}
+    this.sgamy={buy:0,sell:0,totalMoney:0}
+    this.ubsfy={buy:0 ,sell:0,totalMoney:0}
+    this.atvi={buy:0 ,sell:0,totalMoney:0}
+    for(var i=0;i<this.transactions.length;i++)
+    {
+      
+      if(this.transactions[i].username==="admin"){
+        
+        if(this.transactions[i].b_type==="BUY"){
+            if(this.transactions[i].stocktype==="NTDOY"){
+              this.ntdoy.buy+=this.transactions[i].quantity;
+              this.ntdoy.totalMoney+=(this.transactions[i].quantity*this.transactions[i].price);
+              console.log(this.ntdoy.buy+"\n");
+            }
+            else if(this.transactions[i].stocktype=== "DIS"){
+                this.dis.buy+=this.transactions[i].quantity;
+                this.dis.totalMoney+=(this.transactions[i].quantity*this.transactions[i].price);
+            }
+            else if(this.transactions[i].stocktype==="SGAMY"){
+                this.sgamy.buy+=this.transactions[i].quantity;
+                this.sgamy.totalMoney+=(this.transactions[i].quantity*this.transactions[i].price);
+            }
+            else if(this.transactions[i].stocktype==="UBSFY"){
+                this.ubsfy.buy+=this.transactions[i].quantity;
+                this.ubsfy.totalMoney+=(this.transactions[i].quantity*this.transactions[i].price);
+            }
+            else if(this.transactions[i].stocktype==="ATVI"){
+                this.atvi.buy+=this.transactions[i].quantity;
+                this.atvi.totalMoney+=(this.transactions[i].quantity*this.transactions[i].price);
+            }
+          }
+      }
+      else{  
+        if(this.transactions[i].b_type==="SELL"){
+            if(this.transactions[i].stocktype==="NTDOY"){
+              this.ntdoy.buy-=this.transactions[i].quantity;
+              this.ntdoy.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
+            }
+            else if(this.transactions[i].stocktype=== "DIS"){
+                this.dis.buy-=this.transactions[i].quantity;
+                this.dis.totalMoney+=(this.transactions[i].quantity*this.transactions[i].price);
+            }
+            else if(this.transactions[i].stocktype==="SGAMY"){
+                this.sgamy.buy-=this.transactions[i].quantity;
+                this.sgamy.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
+            }
+            else if(this.transactions[i].stocktype==="UBSFY"){
+                this.ubsfy.buy-=this.transactions[i].quantity;
+                this.ubsfy.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
+            }
+            else if(this.transactions[i].stocktype==="ATVI"){
+                this.atvi.buy-=this.transactions[i].quantity;
+                this.atvi.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
+            }
+          }
+         if(this.transactions[i].b_type==="BUY"){
+
+            if(this.transactions[i].stocktype==="NTDOY"){
+              this.ntdoy.sell+=this.transactions[i].quantity;
+              this.ntdoy.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
+            }
+            else if(this.transactions[i].stocktype=== "DIS"){
+                this.dis.sell+=this.transactions[i].quantity;
+                this.dis.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
+            }
+            else if(this.transactions[i].stocktype==="SGAMY"){
+                this.sgamy.sell+=this.transactions[i].quantity;
+                this.sgamy.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
+            }
+            else if(this.transactions[i].stocktype==="UBSFY"){
+                this.ubsfy.sell+=this.transactions[i].quantity;
+                this.ubsfy.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
+            }
+            else if(this.transactions[i].stocktype==="ATVI"){
+                this.atvi.sell+=this.transactions[i].quantity;
+                this.atvi.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
+           }
+          }
+        }
+      }
+      console.log(this.dis.totalMoney+" sell:" + this.dis.sell+" buy:" +this.dis.buy);
+
+    }
 
   render () {
     if(this.state.transactions === false || this.state.prices === false){
