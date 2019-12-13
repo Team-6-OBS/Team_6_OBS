@@ -5,10 +5,6 @@ entrypoint: gunicorn -b :$PORT main:app
 runtime_config:
     python_version: 3
 
-env_variables:
-    DB_CONN_STRING: mysql+pymysql://root:password@35.224.129.168/main_server
-    JWT_SECRET: XCAP05H6LoKvbRRa/QkqLNMI7cOHguaRyHzyg7n5qEkGjQmtBhz4SzYh4Fqwjyi3KJHlSXKPwVu2+bXr6CtpgQ==
-
 manual_scaling:
   instances: 1
 resources:

@@ -69,7 +69,7 @@ export class Header extends React.Component {
                   <a className="nav-link" href="/logs">Logs</a>
                 </li>
                 <li className="nav-item active">
-                  <a className="nav-link" href="/">P&L</a>
+                  <a className="nav-link" href="/pnl">P&L</a>
                 </li>
               </ul>
             </div>
