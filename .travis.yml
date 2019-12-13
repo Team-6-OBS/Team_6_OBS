@@ -12,6 +12,8 @@ jobs:
         - npm run build
     - stage: test
       script: pytest main_test.py
+    -
+      script: pytest new_tests.py
     - #cypress headless tests
       before_script: npm start
       script:

@@ -48,9 +48,7 @@ Given: User has logged in to their account
 When: Navigating to the buy or sell page for their chosen stock symbol
 Then: Account may buy or sell shares
 
-Scenario:Authed users are not permitted to open more that 3 accounts 
+Scenario:Authed users are not permitted to open more that 3 accounts
 Given:  Authed user has already made 3 different accounts
 When: User click button to create a new account .
 Then:  windows pops up that says “You can't have more than 3 accounts” 
-
-
