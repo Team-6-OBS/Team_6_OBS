@@ -2,7 +2,7 @@ let newUser = makeid(12)
 let newEmail = makeid(5) + '@gmail.com'
 
 
-/*---------------    ALL TESTS HERE ARE: Acceptance tests --------------------------*/
+/*---------------    ALL TESTS HERE ARE: User Acceptance tests --------------------------*/
 
 describe('View Tests without credentials', function () {//3. Non-authed users cannot view a dashboard or engage stock transactions
     it('Goes to the main web address without authenitcation and is unable to got to /dashboard', function () {
@@ -394,7 +394,62 @@ describe('Stock Buy/Sell functional tests', function () {//10. Authed users can 
         cy.get('.ntdoy').children().eq(1).should('have.text', '1')
     })
 })
+describe('View test over multiple account tables', function () {//9. OBS maintains separate cash and stock holdings purchased per account  
+    it('Between the two tables of accounts different funds and stock amounts are found', function () {
+        cy.visit('http://localhost:5000')
 
+        cy.get('body').children().eq(0).children().eq(0).children().eq(0).children().eq(1).children().eq(0).type(newUser).should('have.value', newUser)
+        //cy.get('.mr-sm-2 username-login')
+        cy.get('body').children().eq(0).children().eq(0).children().eq(0).children().eq(1).children().eq(1).type('long_password').should('have.value', 'long_password')
+        //cy.get('mr-sm-2 pass-login')
+        cy.get('body').children().eq(0).children().eq(0).children().eq(0).children().eq(1).children().eq(2).click()
+      //cy.get('.btn btn-outline-success mr-sm-2 button-login')
+
+        cy.wait(3000)
+        cy.visit('http://localhost:5000/dashboard')
+        cy.wait(3000)
+
+        cy.window().then(win => {
+            cy.stub(win, 'prompt').returns('Account2')
+            cy.get('button.btn.btn-primary').contains('Create New Table').click();
+            //... Saved value assert
+        })
+        cy.wait(3000)
+
+        cy.get('thead').eq(1).find('tr').eq(0).children().contains('Account2')
+        cy.get('thead').eq(1).find('tr').eq(0).children().eq(1).should('have.text', '0')
+        cy.get('thead').eq(0).find('tr').eq(0).children().contains('Account1')
+        cy.get('thead').eq(0).find('tr').eq(0).children().eq(1).should('not.have.text', '0')
+        cy.get('.ntdoy').contains('1')
+        cy.get('.ntdoy').contains('0')
+    })
+})
+describe('Number of Accounts possible tests', function () {//11. Authed users are not permitted to open more that 3 accounts 
+    it('In creating three tables/accounts a button to create another should not exist', function () {
+        cy.visit('http://localhost:5000')
+
+        cy.get('body').children().eq(0).children().eq(0).children().eq(0).children().eq(1).children().eq(0).type(newUser).should('have.value', newUser)
+        //cy.get('.mr-sm-2 username-login')
+        cy.get('body').children().eq(0).children().eq(0).children().eq(0).children().eq(1).children().eq(1).type('long_password').should('have.value', 'long_password')
+        //cy.get('mr-sm-2 pass-login')
+        cy.get('body').children().eq(0).children().eq(0).children().eq(0).children().eq(1).children().eq(2).click()
+        //cy.get('.btn btn-outline-success mr-sm-2 button-login')
+
+        cy.wait(3000)
+        cy.visit('http://localhost:5000/dashboard')
+        cy.wait(3000)
+
+        cy.window().then(win => {
+            cy.stub(win, 'prompt').returns('Account3')
+            cy.get('button.btn.btn-primary').contains('Create New Table').click();
+            //... Saved value assert
+        })
+        cy.wait(3000)
+
+        cy.get('thead').should('have.length', 3)
+        cy.get('button.btn.btn-primary').contains('Create New Table').should('not.exist')
+    })
+})
 //helper function to create randomized usernames and emails so tests can run the same way every time
 function makeid(length) {
     var result = '';
