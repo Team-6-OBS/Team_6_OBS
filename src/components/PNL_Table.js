@@ -49,11 +49,11 @@ export class PNL_Table extends React.Component {
   }
 
   getPNL(){
-    this.dis={buy:0 ,sell:0,totalMoney:0}
-    this.ntdoy={buy:0 ,sell:0,totalMoney:0}
-    this.sgamy={buy:0,sell:0,totalMoney:0}
-    this.ubsfy={buy:0 ,sell:0,totalMoney:0}
-    this.atvi={buy:0 ,sell:0,totalMoney:0}
+    this.dis={adminStock:0 ,userStock:0,pnl:0}
+    this.ntdoy={adminStock:0 ,userStock:0,pnl:0}
+    this.sgamy={adminStock:0,userStock:0,pnl:0}
+    this.ubsfy={adminStock:0 ,userStock:0,pnl:0}
+    this.atvi={adminStock:0 ,userStock:0,pnl:0}
     for(var i=0;i<this.transactions.length;i++)
     {
 
@@ -61,100 +61,112 @@ export class PNL_Table extends React.Component {
 
         if(this.transactions[i].b_type==="BUY"){
             if(this.transactions[i].stocktype==="NTDOY"){
-              this.ntdoy.buy+=this.transactions[i].quantity;
-              this.ntdoy.totalMoney+=(this.transactions[i].quantity*this.transactions[i].price);
+              this.ntdoy.adminStock+=this.transactions[i].quantity;
+              this.ntdoy.pnl-=(this.transactions[i].quantity*this.transactions[i].price);
+              console.log("this is i="+i+" adminStock Admin current adminStock:" + this.ntdoy.adminStock+ " current userStock " +this.ntdoy.userStock +" current pnl: "+this.ntdoy.pnl);
             }
             else if(this.transactions[i].stocktype=== "DIS"){
-                this.dis.buy+=this.transactions[i].quantity;
-                console.log(this.transactions[i].quantity+" admin buy:"+(this.transactions[i].quantity*this.transactions[i].price)+"\n");
+                this.dis.adminStock+=this.transactions[i].quantity;
+                //console.log(this.transactions[i].quantity+" admin adminStock:"+(this.transactions[i].quantity*this.transactions[i].price)+"\n");
               
-                this.dis.totalMoney+=(this.transactions[i].quantity*this.transactions[i].price);
+                this.dis.pnl-=(this.transactions[i].quantity*this.transactions[i].price);
             }
             else if(this.transactions[i].stocktype==="SGAMY"){
-                this.sgamy.buy+=this.transactions[i].quantity;
-                this.sgamy.totalMoney+=(this.transactions[i].quantity*this.transactions[i].price);
+                this.sgamy.adminStock+=this.transactions[i].quantity;
+                this.sgamy.pnl-=(this.transactions[i].quantity*this.transactions[i].price);
             }
             else if(this.transactions[i].stocktype==="UBSFY"){
-                this.ubsfy.buy+=this.transactions[i].quantity;
-                this.ubsfy.totalMoney+=(this.transactions[i].quantity*this.transactions[i].price);
+                this.ubsfy.adminStock+=this.transactions[i].quantity;
+                this.ubsfy.pnl-=(this.transactions[i].quantity*this.transactions[i].price);
             }
             else if(this.transactions[i].stocktype==="ATVI"){
-                this.atvi.buy+=this.transactions[i].quantity;
-                this.atvi.totalMoney+=(this.transactions[i].quantity*this.transactions[i].price);
+                this.atvi.adminStock+=this.transactions[i].quantity;
+                this.atvi.pnl-=(this.transactions[i].quantity*this.transactions[i].price);
+            }
+          }
+          else{
+            if(this.transactions[i].stocktype==="NTDOY"){
+            //  this.ntdoy.adminStock+=this.transactions[i].quantity;
+              this.ntdoy.pnl+=(this.transactions[i].quantity*this.transactions[i].price);
+              console.log("this is i="+i+" adminStock Admin current adminStock:" + this.ntdoy.adminStock+ " current userStock " +this.ntdoy.userStock +" current pnl: "+this.ntdoy.pnl);
+            }
+            else if(this.transactions[i].stocktype=== "DIS"){
+              //  this.dis.adminStock+=this.transactions[i].quantity;
+                //console.log(this.transactions[i].quantity+" admin adminStock:"+(this.transactions[i].quantity*this.transactions[i].price)+"\n");
+              
+                this.dis.pnl+=(this.transactions[i].quantity*this.transactions[i].price);
+            }
+            else if(this.transactions[i].stocktype==="SGAMY"){
+              // this.sgamy.adminStock+=this.transactions[i].quantity;
+                this.sgamy.pnl+=(this.transactions[i].quantity*this.transactions[i].price);
+            }
+            else if(this.transactions[i].stocktype==="UBSFY"){
+              // this.ubsfy.adminStock+=this.transactions[i].quantity;
+                this.ubsfy.pnl+=(this.transactions[i].quantity*this.transactions[i].price);
+            }
+            else if(this.transactions[i].stocktype==="ATVI"){
+              // this.atvi.adminStock+=this.transactions[i].quantity;
+                this.atvi.pnl+=(this.transactions[i].quantity*this.transactions[i].price);
             }
           }
       }
       else{
         if(this.transactions[i].b_type==="SELL"){
             if(this.transactions[i].stocktype==="NTDOY"){
-              this.ntdoy.buy-=this.transactions[i].quantity;
-              this.ntdoy.sell-=this.transactions[i].quantity;
-             // this.ntdoy.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
+              this.ntdoy.adminStock-=this.transactions[i].quantity;
+              this.ntdoy.userStock-=this.transactions[i].quantity;
+              
             }
             else if(this.transactions[i].stocktype=== "DIS"){
-                this.dis.buy-=this.transactions[i].quantity;
-                  this.dis.sell-=this.transactions[i].quantity;
-                  console.log(this.transactions[i].quantity+" sell:"+(this.transactions[i].quantity*this.transactions[i].price)+"\n");
-                //this.dis.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
-                
+                this.dis.adminStock-=this.transactions[i].quantity;
+                  this.dis.userStock-=this.transactions[i].quantity;
+             
             }
             else if(this.transactions[i].stocktype==="SGAMY"){
-                this.sgamy.buy-=this.transactions[i].quantity;
-                  this.sgamy.sell-=this.transactions[i].quantity;
-                //this.sgamy.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
-            }
+                this.sgamy.adminStock-=this.transactions[i].quantity;
+                  this.sgamy.userStock-=this.transactions[i].quantity;
+                  }
             else if(this.transactions[i].stocktype==="UBSFY"){
-                this.ubsfy.buy-=this.transactions[i].quantity;
-                this.ubsfy.sell-=this.transactions[i].quantity;
-               // this.ubsfy.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
+                this.ubsfy.adminStock-=this.transactions[i].quantity;
+                this.ubsfy.userStock-=this.transactions[i].quantity;
+               // this.ubsfy.pnl-=(this.transactions[i].quantity*this.transactions[i].price);
             }
             else if(this.transactions[i].stocktype==="ATVI"){
-                this.atvi.buy-=this.transactions[i].quantity;
-                this.atvi.sell-=this.transactions[i].quantity;
-                //this.atvi.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
+                this.atvi.adminStock-=this.transactions[i].quantity;
+                this.atvi.userStock-=this.transactions[i].quantity;
+                //this.atvi.pnl-=(this.transactions[i].quantity*this.transactions[i].price);
             }
           }
           else if(this.transactions[i].b_type==="BUY"){
 
             if(this.transactions[i].stocktype==="NTDOY"){
-              this.ntdoy.sell+=this.transactions[i].quantity;
-
-              this.ntdoy.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
+              this.ntdoy.userStock+=this.transactions[i].quantity;
             }
             else if(this.transactions[i].stocktype=== "DIS"){
-                this.dis.sell+=this.transactions[i].quantity;
-                console.log(this.transactions[i].quantity+" buy:"+(this.transactions[i].quantity*this.transactions[i].price)+"\n");
-              
-                this.dis.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
-            }
+                this.dis.userStock+=this.transactions[i].quantity;
+                  }
             else if(this.transactions[i].stocktype==="SGAMY"){
-                this.sgamy.sell+=this.transactions[i].quantity;
-
-                this.sgamy.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
-            }
+                this.sgamy.userStock+=this.transactions[i].quantity;
+   }
             else if(this.transactions[i].stocktype==="UBSFY"){
-                this.ubsfy.sell+=this.transactions[i].quantity;
-                this.ubsfy.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
+                this.ubsfy.userStock+=this.transactions[i].quantity;
             }
             else if(this.transactions[i].stocktype==="ATVI"){
-                this.atvi.sell+=this.transactions[i].quantity;
-                this.atvi.totalMoney-=(this.transactions[i].quantity*this.transactions[i].price);
+                this.atvi.userStock+=this.transactions[i].quantity;
            }
           }
         }
       }
-      this.atvi.buy-=this.atvi.sell;
-      this.dis.buy-=this.dis.sell;
-      this.ubsfy.buy-=this.ubsfy.sell;
-      this.ntdoy.buy-=this.ntdoy.sell;
-      this.sgamy.buy-=this.sgamy.sell;
-      this.dis.totalMoney.toFixed(2);
-      this.ubsfy.totalMoney.toFixed(2);
-      
+      this.ntdoy.adminStock-=this.ntdoy.userStock;
+      this.dis.adminStock-=this.dis.userStock;
+      this.atvi.adminStock-=this.atvi.userStock;
+      this.sgamy.adminStock-=this.sgamy.userStock;
+      this.ubsfy.adminStock-=this.ubsfy.userStock;
     }
 
   render () {
     if(this.state.transactions === false || this.state.prices === false){
+      
       return (
         <h3>loading...</h3>
       );
@@ -177,38 +189,38 @@ export class PNL_Table extends React.Component {
                 <tbody>
                   <tr>
                     <td>NTDOY</td>
-                    <td>{this.ntdoy.buy}</td>
-                    <td>{this.ntdoy.sell}</td>
+                    <td>{this.ntdoy.adminStock}</td>
+                    <td>{this.ntdoy.userStock}</td>
                     <td>{this.prices.quote[0].last}</td>
-                    <td>{((this.ntdoy.totalMoney - (this.prices.quote[0].last*this.ntdoy.buy))*-1).toFixed(2)}</td>
+                    <td>{((this.ntdoy.pnl - (this.prices.quote[0].last*this.ntdoy.adminStock)))}</td>
                   </tr>
                   <tr>
                     <td>DIS</td>
-                    <td>{this.dis.buy}</td>
-                    <td>{this.dis.sell}</td>
+                    <td>{this.dis.adminStock}</td>
+                    <td>{this.dis.userStock}</td>
                     <td>{this.prices.quote[1].last}</td>
-                    <td>{((this.dis.totalMoney - (this.prices.quote[1].last*this.dis.buy))*-1).toFixed(2)}</td>
+                    <td>{((this.dis.pnl - (this.prices.quote[1].last*this.dis.adminStock))).toFixed(2)}</td>
                   </tr>
                   <tr>
                     <td>ATVI</td>
-                    <td>{this.atvi.buy}</td>
-                    <td>{this.atvi.sell}</td>
+                    <td>{this.atvi.adminStock}</td>
+                    <td>{this.atvi.userStock}</td>
                     <td>{this.prices.quote[2].last}</td>
-                    <td>{((this.atvi.totalMoney - (this.prices.quote[2].last*this.atvi.buy))*-1).toFixed(2)}</td>
+                    <td>{((this.atvi.pnl - (this.prices.quote[2].last*this.atvi.adminStock))).toFixed(2)}</td>
                   </tr>
                   <tr>
                     <td>SGAMY</td>
-                    <td>{this.sgamy.buy}</td>
-                    <td>{this.sgamy.sell}</td>
+                    <td>{this.sgamy.adminStock}</td>
+                    <td>{this.sgamy.userStock}</td>
                     <td>{this.prices.quote[3].last}</td>
-                    <td>{((this.sgamy.totalMoney - (this.prices.quote[3].last*this.sgamy.buy))*-1).toFixed(2)}</td>
+                    <td>{((this.sgamy.pnl - (this.prices.quote[3].last*this.sgamy.adminStock))).toFixed(2)}</td>
                   </tr>
                   <tr>
                     <td>UBSFY</td>
-                    <td>{this.ubsfy.buy}</td>
-                    <td>{this.ubsfy.sell}</td>
+                    <td>{this.ubsfy.adminStock}</td>
+                    <td>{this.ubsfy.userStock}</td>
                     <td>{this.prices.quote[4].last}</td>
-                    <td>{((this.ubsfy.totalMoney - (this.prices.quote[4].last*this.ubsfy.buy))*-1).toFixed(2)}</td>
+                    <td>{((this.ubsfy.pnl - (this.prices.quote[4].last*this.ubsfy.adminStock))*-1).toFixed(2)}</td>
                   </tr>
                 </tbody>
               </table>
