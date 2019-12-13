@@ -50,7 +50,7 @@ def get_logs():
             logs = json.loads(parsed_query_res.replace('\'', '\"'))
             return logs
 
-        return 'Unauthorized User', 500
+        return 'Only the admin may view transactions', 500
 
 ######## END LOG FUNCTIONS ########
 
@@ -158,7 +158,7 @@ def save_to_db(b_type, name, acc, price, amt, stock_inventory, user_inventory, s
             required = int(amt) - stock_inventory + 100
             sql = 'INSERT INTO buy_sell(b_type, username, t_account, price, stocktype, quantity) '
             sql += 'VALUES(\'BUY\', \'admin\', \'Bank Stock Inventory\', \'' + str(price)
-            sql += '\', \'' + str(required) + '\'),'
+            sql += '\', \'' + sym + '\', \'' + str(required) + '\'),'
             sql += '(\'SELL\', \'admin\', \'Bank Stock Inventory\', \'' + str(price)
             sql += '\', \'' + sym + '\', \'' + str(amt) + '\'),'
             sql += '(\'' + b_type + '\', \'' + name + '\', \'' + acc + '\', \'' + str(price)
@@ -350,7 +350,6 @@ def total():
 @app.route('/buy', methods=['POST'])
 def buy():
     """take an account and quantity and attempts to purchase that much stock to that account"""
-    #auth = request.headers.get('auth')
     quantity = request.form.get('quantity')
     account = request.form.get('account')
     stock_symbol = request.form.get('symbol')
