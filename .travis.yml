@@ -19,7 +19,7 @@ jobs:
       script: pytest new_tests.py
     - #cypress headless tests
       before_script:
-        - ./start-server.sh
+        - ./start_server.sh
       script:
         - ./node_modules/.bin/cypress run
     - stage: lint
