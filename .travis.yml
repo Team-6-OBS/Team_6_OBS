@@ -19,10 +19,10 @@ jobs:
       script: pytest new_tests.py
     - #cypress headless tests
       before_script:
-        - npm start -- --silent
+        - ./start-server.sh
       script:
         - ./node_modules/.bin/cypress run
-    - stage: linting
+    - stage: lint
       script: pylint -E main.py
     - stage: deploy
       script: skip     # usually you do not want to rerun any tests
