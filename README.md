@@ -43,16 +43,7 @@ lint tool: https://www.pylint.org
 
 6. Overview
 
-For this project the database we used was MySQL. This allowed us to use sql procedures to simplify certain tasks,
-like logging. Back end that we used to query the database was python 3.7.4 with flask. Flask helped us set us a simple
-request response driven web server. Most Endpoints served to receive data and insert it into the database to formulate
-a response containing either queried data or a confirmation that an update was successful. This confimation was then 
-sent to our React frontend. React was used to create the view and make async axios requests to communicate with our backend.
+For this project the database we used a google cloud hosted instance of a MySQL database. This allowed us to utilize sql procedures to simplify certain tasks, like logging and . Back end that we used to query the database was python 3.7.4 with flask. Flask helped us set up a simple REST interactions for our web server. Most Endpoints served to receive user requests and manage the database interactions associated with them to formulate a response containing either queried data or a confirmation that an update was successful. These responses interfaced with with our React frontend to create, modify and populate the view. React communicated inversely with our backend by using async axios requests to query data.
 
 We decided to use the google cloud app engine for deployment because we found that it was very easy to quickly deploy
-python web applications. It was also the most common google cloud deployment tool used with out CI server: travis ci
-so it gave us the most information on how to manage automated deployment. With travis CI we were able to run many
-jobs in stages, but each job within a stage could be run in parallel to save time runnin multiple types of tests at
-once in the same stage as opposed to different stages. Our source code management tool was github and we linked that to
-travis ci to automate build on a push to master. Our authentication tool was a simple JWT token that was attached to an
-http only cookie on the browser that we check to determine user idenetity throught multiple requests.
+python web applications and had tools that eased managing connections to our database. It was also the most common google cloud deployment tool used with out CI server, travis ci, so it provided us with the most information on how to manage our automated deployment. With travis CI we were able to run many jobs in stages, with each job within a stage able to be run in parallel.  This saved time in our test stages, as we could run the different types of tests in one stage. Our source code management tool was github, which we linked that to travis ci to automate our build upon a push to the master branch. For authentication, we used a simple JWT token that could be attached to an http-only cookie on the browser.  This allowed us to determine the user identity throughtout multiple requests in a user session.
