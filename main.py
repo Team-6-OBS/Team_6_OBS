@@ -5,6 +5,7 @@ import pymysql
 import time
 import json
 import http
+import sys
 
 app = Flask(__name__)
 
@@ -421,12 +422,16 @@ def sell():
 
 ######## BEGIN USER ROUTES ########
 @app.route('/')
-def logs_view():
+def home():
     return render_template("obs_navigation.html")
 
 @app.route('/logs')
-def home():
+def logs_view():
     return render_template("logs.html")
+
+@app.route('/pnl')
+def pnl_view():
+    return render_template("pnl.html")
 
 @app.route('/signup', methods=["GET", "POST"])
 def signup():
@@ -489,7 +494,7 @@ def login():
         #check whether all the data was passed in properly
         if username == None or password == None:
             log_app_transaction('AUTH', 'Failed Request', 'User Login Page', request.method)
-            return "Failed Request", 404
+            return "Failed Request", 500
 
         sql = 'SELECT * FROM accounts WHERE username=\'' + username + '\' AND password=\'' + password + '\''
         test = app.config['DB_CONN'].execute(sql).fetchall()
@@ -506,7 +511,7 @@ def login():
             return res, 200
         else:
             log_app_transaction('AUTH', 'Invalid User Credentials', 'User Login Page', request.method)
-            return "Invalid User Credentials", 400
+            return "Invalid User Credentials", 500
 
 @app.route('/dashboard')
 def dashboard():
@@ -517,6 +522,22 @@ def welcome():
     return render_template("obs_home.html")
 
 ######## END USER ROUTES ########
+'''
+@app.route('/init_db')
+def init_db():
+    sql1 = 'Insert into buy_sell (b_type,username,price,t_account,stocktype,quantity) values(\'BUY\',\'admin\',' + str(get_delayed_price('NTDOY')) + ',\'Bank Stock Inventory\',\'NTDOY\',5000)'
+    sql2 = 'Insert into buy_sell (b_type,username,price,t_account,stocktype,quantity) values(\'BUY\',\'admin\',' + str(get_delayed_price('DIS')) + ',\'Bank Stock Inventory\',\'DIS\',5000)'
+    sql3 = 'Insert into buy_sell (b_type,username,price,t_account,stocktype,quantity) values(\'BUY\',\'admin\',' + str(get_delayed_price('SGAMY')) + ',\'Bank Stock Inventory\',\'SGAMY\',5000)'
+    sql4 = 'Insert into buy_sell (b_type,username,price,t_account,stocktype,quantity) values(\'BUY\',\'admin\',' + str(get_delayed_price('ATVI')) + ',\'Bank Stock Inventory\',\'ATVI\',5000)'
+    sql5 = 'Insert into buy_sell (b_type,username,price,t_account,stocktype,quantity) values(\'BUY\',\'admin\',' + str(get_delayed_price('UBSFY')) + ',\'Bank Stock Inventory\',\'UBSFY\',5000)'
+    query_db(sql1)
+    query_db(sql2)
+    query_db(sql3)
+    query_db(sql4)
+    query_db(sql5)
+
+    return 'DB Done', 200
+'''
 
 if __name__ == "__main__" :
 
