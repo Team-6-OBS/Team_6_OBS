@@ -19,7 +19,7 @@ jobs:
       script: pytest new_tests.py
     - #cypress headless tests
       before_script:
-        - - chmod +x ./start_server.sh
+        - chmod +x ./start_server.sh
         - ./start_server.sh
       script:
         - ./node_modules/.bin/cypress run
