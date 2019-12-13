@@ -2,13 +2,19 @@ language: python
 python:
   - "3.7"
 
+deploy:
+  skip_cleanup: true
+
+cache:
+  directories:
+    - ~/.npm
+    - ~/.cache
+
 jobs:
   include:
     - stage: build
-      script: pip install -r requirements.txt
-    - #install node dependencies and try to use webpack to build javascript
       script:
-        - npm install
+        - npm ci
         - npm run build
     - stage: test
       script: pytest main_test.py
@@ -16,7 +22,6 @@ jobs:
       script: pytest new_tests.py
     - #cypress headless tests
       before_script:
-        - npm i
         - npm start -- --silent
       script:
         - ./node_modules/.bin/cypress run
