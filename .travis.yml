@@ -12,13 +12,13 @@ jobs:
         - npm run build
     - stage: test
       script: pytest main_test.py
-    -
+    - #cypress headless tests
+      before_script: npm start
       script:
         - npm i
         - ./node_modules/.bin/cypress run
     - stage: linting
-      script:
-        - pylint -E main.py
+      script: pylint -E main.py
     - stage: deploy
       script: skip     # usually you do not want to rerun any tests
       deploy: &gae
