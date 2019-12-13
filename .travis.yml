@@ -15,9 +15,9 @@ jobs:
     -
       script: pytest new_tests.py
     - #cypress headless tests
-      before_script: npm start
       script:
         - npm i
+        - npm start
         - ./node_modules/.bin/cypress run
     - stage: linting
       script: pylint -E main.py
